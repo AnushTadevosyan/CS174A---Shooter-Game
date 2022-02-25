@@ -11,7 +11,7 @@ class Actor {
         this.rot = rotations;
         this.size = size;
         this.collider_radius = hitbox_size;
-
+        this.alive = true;
     }
 
     // returns coordinates of this actor's origin (in middle)
@@ -44,12 +44,23 @@ class Actor {
     get_hitbox_size() { return undefined }
 
     get_radius() { return this.collider_radius; }
-}
+
+    kill() { this.alive = false; }
+
+    is_alive() { return this.alive; }
+
+    add_damage(damage_amount) {
+        if (this.health - damage_amount <= 0) {
+            this.health = 0;
+            this.alive = false;
+        }
+    }
+};
 
 // what the player actually shoots
 class Bullet extends Actor {
     constructor(coordinates, size, speed, angle) {
-        super(coordinates, new vec3(0,0,0), 1);
+        super(coordinates, new vec3(0,0,0), size);
         this.speed = speed;
         this.angle = angle;
         this.start = new vec3(coordinates.x, coordinates.y, coordinates.z);
@@ -59,6 +70,8 @@ class Bullet extends Actor {
         this.start.x += dt * this.speed * Math.cos(this.angle);
         this.start.y += dt * this.speed * Math.sin(this.angle);
     }
-
-    
 };
+
+class Enemy extends Actor {
+
+}
