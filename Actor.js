@@ -1,7 +1,7 @@
 import {defs, tiny} from './examples/common.js';
 
 const {
-    Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene,
+    Vector, Vector3, vec, vec3, vec4, color, hex_color, Matrix
 } = tiny;
 
 class Actor {
@@ -11,6 +11,7 @@ class Actor {
         this.rot = rotations;
         this.size = size;
         this.collider_radius = hitbox_size;
+
     }
 
     // returns coordinates of this actor's origin (in middle)
@@ -48,6 +49,16 @@ class Actor {
 // what the player actually shoots
 class Bullet extends Actor {
     constructor(coordinates, size, speed, angle) {
-        super(coordinates, ) 
+        super(coordinates, new vec3(0,0,0), 1);
+        this.speed = speed;
+        this.angle = angle;
+        this.start = new vec3(coordinates.x, coordinates.y, coordinates.z);
     }
+
+    update(t, dt) {
+        this.start.x += dt * this.speed * Math.cos(this.angle);
+        this.start.y += dt * this.speed * Math.sin(this.angle);
+    }
+
+    
 };
