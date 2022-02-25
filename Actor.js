@@ -4,6 +4,8 @@ const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Matrix
 } = tiny;
 
+function tuple3(x, y, z) { return {x: x, y: y, z: z}}
+
 class Actor {
 
     constructor(coordinates, rotations, size, hitbox_size = size) {
@@ -60,10 +62,10 @@ class Actor {
 // what the player actually shoots
 class Bullet extends Actor {
     constructor(coordinates, size, speed, angle) {
-        super(coordinates, new vec3(0, 0, 0), size);
+        super(coordinates, tuple3(0, 0, 0), size);
         this.speed = speed;
         this.angle = angle;
-        this.start = new vec3(coordinates.x, coordinates.y, coordinates.z);
+        this.start = tuple3(coordinates.x, coordinates.y, coordinates.z);
     }
 
     update(t, dt) {
@@ -73,16 +75,15 @@ class Bullet extends Actor {
 };
 
 class Enemy extends Actor {
-    constructor(y_position, size, angle) {
-        super(coordinates, new vec3(0, y_position, 0), size);
+    constructor(height, size, speed) {
+        super(tuple3(20, 0, height), tuple3(0, 0, 0), size);
         this.speed = -1 * speed;
-        this.angle = angle;
-        this.start = new vec3(coordinates.x, coordinates.y, coordinates.z);
+        // this.angle = angle;
+        this.start = this.get_coordinates();
     }
 
     update(t, dt) {
-        this.start.x += dt * this.speed;
-        this.start.y += dt * this.speed;
+        this.coords.x += dt * this.speed;
     }
 }
 

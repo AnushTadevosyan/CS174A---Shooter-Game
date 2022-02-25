@@ -1,5 +1,5 @@
 import {defs, tiny} from './examples/common.js';
-import { Bullet } from './Actor.js';
+import { Bullet, Enemy } from './Actor.js';
 
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene,
@@ -39,6 +39,8 @@ export class Assignment3 extends Scene {
         }
 
         this.initial_camera_location = Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90));
+
+        this.test_enemy = new Enemy(0, 1, .5);
     }
 
     make_control_panel() {
@@ -60,12 +62,17 @@ export class Assignment3 extends Scene {
 
     move_up() {
         this.model_transform = this.model_transform.times(Mat4.translation(0,1,0))
-        
     }
 
     move_down() {
         this.model_transform = this.model_transform.times(Mat4.translation(0,-1,0))
-        
+    }
+
+    draw_actor(actor, shape, context, program_state) {
+        let coords = actor.get_coordinates();
+        let s = actor.get_radius() * 2;
+        let model_transform = Mat4.translation(coords.x, coords.y, coords.z).times(Mat4.scale(s, s, s));
+        shape.draw(context, program_state, model_transform, this.materials.test.override({color: hex_color("#FF0000")}));
     }
 
     display(context, program_state) {
@@ -85,6 +92,7 @@ export class Assignment3 extends Scene {
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
         const t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
+        this.test_enemy.update(t, dt);
         const yellow = hex_color("#fac91a");
         const red = hex_color("#FF0000");
 
@@ -99,6 +107,8 @@ export class Assignment3 extends Scene {
         //the objects that are being shooted
         let model_one = Mat4.identity();
         model_one = model_one.times(Mat4.translation(0,-8,-1));
+
+        this.draw_actor(this.test_enemy, this.shapes.sphere, context, program_state);
 
         for(var i = 0; i <4; i++){
             model_one = model_one.times(Mat4.translation(0,3,-1));
