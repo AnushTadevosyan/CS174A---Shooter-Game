@@ -8,12 +8,13 @@ function tuple3(x, y, z) { return {x: x, y: y, z: z}}
 
 class Actor {
 
-    constructor(coordinates, rotations, size, hitbox_size = size) {
+    constructor(coordinates, rotations, size, hitbox_size = size, health = 1) {
         this.coords = coordinates;
         this.rot = rotations;
         this.size = size;
         this.collider_radius = hitbox_size;
         this.alive = true;
+        this.health = health;
     }
 
     // returns coordinates of this actor's origin (in middle)
@@ -65,12 +66,11 @@ class Bullet extends Actor {
         super(coordinates, tuple3(0, 0, 0), size);
         this.speed = speed;
         this.angle = angle;
-        this.start = tuple3(coordinates.x, coordinates.y, coordinates.z);
     }
 
     update(t, dt) {
-        this.start.x += dt * this.speed * Math.cos(this.angle);
-        this.start.y += dt * this.speed * Math.sin(this.angle);
+        this.coords.x += dt * this.speed * Math.cos(this.angle);
+        this.coords.y += dt * this.speed * Math.sin(this.angle);
     }
 };
 
@@ -79,7 +79,6 @@ class Enemy extends Actor {
         super(tuple3(15, height, 0), tuple3(0, 0, 0), size);
         this.speed = -1 * speed;
         // this.angle = angle;
-        this.start = this.get_coordinates();
     }
 
     update(t, dt) {
@@ -87,4 +86,14 @@ class Enemy extends Actor {
     }
 }
 
-export { Bullet, Enemy }
+class Player extends Actor {
+    constructor() {
+        super(tuple3(-15,-1,0), tuple3(0,0,0), 1);
+    }
+
+    move_up(amount = 1) { this.coords.y += amount; }
+
+    move_down(amount = 1) { this.coords.y -= amount; }
+}
+
+export { Bullet, Enemy, Player }

@@ -1,5 +1,5 @@
-import {defs, tiny} from './examples/common.js';
-import { Bullet, Enemy } from './Actor.js';
+import { defs, tiny } from './examples/common.js';
+import { Bullet, Enemy, Player } from './Actor.js';
 
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene,
@@ -22,17 +22,17 @@ export class Assignment3 extends Scene {
             //blaster: 
         };
 
-        this.model_transform = Mat4.identity().times(Mat4.translation(-15,-1,0));
+        this.model_transform = Mat4.identity().times(Mat4.translation(-15, -1, 0));
 
         this.blaster = new defs.Subdivision_Sphere(4);
-        
+
 
         // *** Materials
         this.materials = {
             test: new Material(new defs.Phong_Shader(),
-                {ambient: .4, diffusivity: .6, color: hex_color("#ffffff")}),
+                { ambient: .4, diffusivity: .6, color: hex_color("#ffffff") }),
             test2: new Material(new Gouraud_Shader(),
-                {ambient: .4, diffusivity: .6, color: hex_color("#992828")}),
+                { ambient: .4, diffusivity: .6, color: hex_color("#992828") }),
             ring: new Material(new Ring_Shader()),
             // TODO:  Fill in as many additional material objects as needed in this key/value table.
             //        (Requirement 4)
@@ -41,6 +41,10 @@ export class Assignment3 extends Scene {
         this.initial_camera_location = Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90));
 
         this.enemies = new Array();
+
+        this.bullets = new Array();
+
+        this.player = new Player();
     }
 
     make_control_panel() {
@@ -55,24 +59,30 @@ export class Assignment3 extends Scene {
         // this.new_line();
         // this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.moon);
 
-        this.key_triggered_button( "Move Up", [ "i" ], this.move_up );
-        this.key_triggered_button( "Move Down", [ "k" ], this.move_down );
-        this.key_triggered_button( "Start Game", [ "g" ], () => {});
+        this.key_triggered_button("Move Up", ["i"], this.move_up);
+        this.key_triggered_button("Move Down", ["k"], this.move_down);
+        this.key_triggered_button("Start Game", ["g"], () => { });
+        this.key_triggered_button("Shoot", ["j"], () => { this.shoot_bullet() });
     }
 
     move_up() {
-        this.model_transform = this.model_transform.times(Mat4.translation(0,1,0))
+        this.player.move_up();
     }
 
     move_down() {
-        this.model_transform = this.model_transform.times(Mat4.translation(0,-1,0))
+        this.player.move_down();
+    }
+
+    shoot_bullet() {
+        let c = this.player.get_coordinates();
+        this.bullets.push(new Bullet({ x: c.x, y: c.y, z: c.z }, .2, 6, 0));
     }
 
     draw_actor(actor, shape, context, program_state) {
         let coords = actor.get_coordinates();
         let s = actor.get_radius() * 2;
         let model_transform = Mat4.translation(coords.x, coords.y, coords.z).times(Mat4.scale(s, s, s));
-        shape.draw(context, program_state, model_transform, this.materials.test.override({color: hex_color("#FF0000")}));
+        shape.draw(context, program_state, model_transform, this.materials.test.override({ color: hex_color("#FF0000") }));
     }
 
     display(context, program_state) {
@@ -99,23 +109,46 @@ export class Assignment3 extends Scene {
         //let model_transform = Mat4.identity();
         //this.model_transform = model_transform.times(Mat4.translation(-15,-1,0))
 
-        
-        this.blaster.draw(context, program_state, this.model_transform, this.materials.test.override({color: yellow}));
+        this.player.update();
+        let pc = this.player.get_coordinates();
+        this.blaster.draw(context, program_state, Mat4.translation(pc.x, pc.y, pc.z), this.materials.test.override({ color: yellow }));
 
 
         //the objects that are being shooted
         let model_one = Mat4.identity();
-        model_one = model_one.times(Mat4.translation(0,-8,-1));
+        model_one = model_one.times(Mat4.translation(0, -8, -1));
 
         let rng = Math.random();
 
+        // there is a 1% chance that a new "enemy" will spawn at a random height
         if (rng < 0.01) {
             this.enemies.push(new Enemy(Math.floor(Math.random() * 20 - 3), .3, 5));
         }
 
         for (let i = 0; i < this.enemies.length; i++) {
-            this.enemies[i].update(t, dt);
-            this.draw_actor(this.enemies[i], this.shapes.sphere, context, program_state);
+            if (this.enemies[i].is_alive()) {
+                this.enemies[i].update(t, dt);
+                this.draw_actor(this.enemies[i], this.shapes.sphere, context, program_state);
+            }
+        }
+
+        for (let i = 0; i < this.bullets.length; i++) {
+            let b = this.bullets[i];
+
+            b.update(t, dt);
+
+            if (b.is_alive()) {
+                this.draw_actor(b, this.shapes.sphere, context, program_state);
+                // kill this bullet if it collided with an enemy
+                for (let j = 0; j < this.enemies.length; j++) {
+                    if (this.enemies[j].is_alive() && b.collided(this.enemies[j])) {
+                        this.enemies[j].add_damage(25);
+                        b.kill();
+                    }
+                }
+            }
+
+
         }
 
         /*
@@ -266,7 +299,7 @@ class Gouraud_Shader extends Shader {
         // within this function, one data field at a time, to fully initialize the shader for a draw.
 
         // Fill in any missing fields in the Material object with custom defaults for this shader:
-        const defaults = {color: color(0, 0, 0, 1), ambient: 0, diffusivity: 1, specularity: 1, smoothness: 40};
+        const defaults = { color: color(0, 0, 0, 1), ambient: 0, diffusivity: 1, specularity: 1, smoothness: 40 };
         material = Object.assign({}, defaults, material);
 
         this.send_material(context, gpu_addresses, material);
