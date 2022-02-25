@@ -45,6 +45,8 @@ export class Assignment3 extends Scene {
         this.bullets = new Array();
 
         this.player = new Player();
+
+        this.stars = new Array();
     }
 
     make_control_panel() {
@@ -78,11 +80,11 @@ export class Assignment3 extends Scene {
         this.bullets.push(new Bullet({ x: c.x, y: c.y, z: c.z }, .2, 6, 0));
     }
 
-    draw_actor(actor, shape, context, program_state) {
+    draw_actor(actor, shape, mat, context, program_state) {
         let coords = actor.get_coordinates();
         let s = actor.get_radius() * 2;
         let model_transform = Mat4.translation(coords.x, coords.y, coords.z).times(Mat4.scale(s, s, s));
-        shape.draw(context, program_state, model_transform, this.materials.test.override({ color: hex_color("#FF0000") }));
+        shape.draw(context, program_state, model_transform, mat);
     }
 
     display(context, program_state) {
@@ -124,11 +126,18 @@ export class Assignment3 extends Scene {
         if (rng < 0.01) {
             this.enemies.push(new Enemy(Math.floor(Math.random() * 20 - 3), .3, 5));
         }
+        if (rng < 0.10) {
+            // temporarily use enemies as placeholders for background
+            // TODO: make proper star actor
+            let s = new Enemy(Math.floor(Math.random() * 30 - 10), .02, 10);
+            s.coords.z = -2 // forcibly move to behind playfield. Replace later
+            this.stars.push(s);
+        }
 
         for (let i = 0; i < this.enemies.length; i++) {
             if (this.enemies[i].is_alive()) {
                 this.enemies[i].update(t, dt);
-                this.draw_actor(this.enemies[i], this.shapes.sphere, context, program_state);
+                this.draw_actor(this.enemies[i], this.shapes.sphere, this.materials.test.override({ color: hex_color("#FF0000") }), context, program_state);
             }
         }
 
@@ -138,7 +147,7 @@ export class Assignment3 extends Scene {
             b.update(t, dt);
 
             if (b.is_alive()) {
-                this.draw_actor(b, this.shapes.sphere, context, program_state);
+                this.draw_actor(b, this.shapes.sphere, this.materials.test.override({ color: hex_color("#00FF00") }), context, program_state);
                 // kill this bullet if it collided with an enemy
                 for (let j = 0; j < this.enemies.length; j++) {
                     if (this.enemies[j].is_alive() && b.collided(this.enemies[j])) {
@@ -147,8 +156,11 @@ export class Assignment3 extends Scene {
                     }
                 }
             }
+        }
 
-
+        for (let i = 0; i < this.stars.length; i++) {
+            this.stars[i].update(t, dt);
+            this.draw_actor(this.stars[i], this.shapes.sphere, this.materials.test.override({ color: hex_color("#FFFFFF") }), context, program_state);
         }
 
         /*
