@@ -61,19 +61,23 @@ export class Assignment3 extends Scene {
         // this.new_line();
         // this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.moon);
 
+
+        this.key_triggered_button("Start Game", ["g"], () => { });
         this.key_triggered_button("Move Up", ["i"], this.move_up);
         this.key_triggered_button("Move Down", ["k"], this.move_down);
-        this.key_triggered_button("Start Game", ["g"], () => { });
         this.key_triggered_button("Shoot", ["j"], () => { this.shoot_bullet() });
+        this.key_triggered_button("Pause", ["p"], () => { });
     }
 
     move_up() {
-        this.player.move_up();
+        if(this.player.coords.y<7.5)
+            this.player.move_up();
     }
 
     move_down() {
-        this.player.move_down();
-    }
+        if(this.player.coords.y>-7.5)
+            this.player.move_down();
+    }   
 
     shoot_bullet() {
         let c = this.player.get_coordinates();
