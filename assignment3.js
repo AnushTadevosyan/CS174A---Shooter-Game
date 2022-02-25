@@ -17,7 +17,14 @@ export class Assignment3 extends Scene {
             circle: new defs.Regular_2D_Polygon(1, 15),
             // TODO:  Fill in as many additional shape instances as needed in this key/value table.
             //        (Requirement 1)
+
+            //blaster: 
         };
+
+        this.model_transform = Mat4.identity().times(Mat4.translation(-15,-1,0));
+
+        this.blaster = new defs.Subdivision_Sphere(4);
+        
 
         // *** Materials
         this.materials = {
@@ -35,43 +42,68 @@ export class Assignment3 extends Scene {
 
     make_control_panel() {
         // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-        this.key_triggered_button("View solar system", ["Control", "0"], () => this.attached = () => null);
-        this.new_line();
-        this.key_triggered_button("Attach to planet 1", ["Control", "1"], () => this.attached = () => this.planet_1);
-        this.key_triggered_button("Attach to planet 2", ["Control", "2"], () => this.attached = () => this.planet_2);
-        this.new_line();
-        this.key_triggered_button("Attach to planet 3", ["Control", "3"], () => this.attached = () => this.planet_3);
-        this.key_triggered_button("Attach to planet 4", ["Control", "4"], () => this.attached = () => this.planet_4);
-        this.new_line();
-        this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.moon);
+        // this.key_triggered_button("View solar system", ["Control", "0"], () => this.attached = () => null);
+        // this.new_line();
+        // this.key_triggered_button("Attach to planet 1", ["Control", "1"], () => this.attached = () => this.planet_1);
+        // this.key_triggered_button("Attach to planet 2", ["Control", "2"], () => this.attached = () => this.planet_2);
+        // this.new_line();
+        // this.key_triggered_button("Attach to planet 3", ["Control", "3"], () => this.attached = () => this.planet_3);
+        // this.key_triggered_button("Attach to planet 4", ["Control", "4"], () => this.attached = () => this.planet_4);
+        // this.new_line();
+        // this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.moon);
+
+        this.key_triggered_button( "Move Up", [ "i" ], this.move_up );
+        this.key_triggered_button( "Move Down", [ "k" ], this.move_down );
+        this.key_triggered_button( "Start Game", [ "g" ], () => {});
+    }
+
+    move_up() {
+        this.model_transform = this.model_transform.times(Mat4.translation(0.3,1,0))
+        
+    }
+
+    move_down() {
+        this.model_transform = this.model_transform.times(Mat4.translation(-0.3,-1,0))
+        
     }
 
     display(context, program_state) {
-        // display():  Called once per frame of animation.
-        // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
+
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
-            // Define the global camera and projection matrices, which are stored in program_state.
+
             program_state.set_camera(this.initial_camera_location);
         }
 
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, .1, 1000);
 
-        // TODO: Create Planets (Requirement 1)
-        // this.shapes.[XXX].draw([XXX]) // <--example
 
-        // TODO: Lighting (Requirement 2)
         const light_position = vec4(0, 5, 5, 1);
-        // The parameters of the Light are: position, color, size
+
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
-        // TODO:  Fill in matrix operations and drawing code to draw the solar system scene (Requirements 3 and 4)
         const t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
         const yellow = hex_color("#fac91a");
-        let model_transform = Mat4.identity();
+        const red = hex_color("#FF0000");
 
-        this.shapes.torus.draw(context, program_state, model_transform, this.materials.test.override({color: yellow}));
+        // the shooting object
+        //let model_transform = Mat4.identity();
+        //this.model_transform = model_transform.times(Mat4.translation(-15,-1,0))
+
+        
+        this.blaster.draw(context, program_state, this.model_transform, this.materials.test.override({color: yellow}));
+
+
+        //the objects that are being shooted
+        let model_one = Mat4.identity();
+        model_one = model_one.times(Mat4.translation(0,-8,-1));
+
+        for(var i = 0; i <4; i++){
+            model_one = model_one.times(Mat4.translation(0,3,-1));
+            this.shapes.sphere.draw(context, program_state, model_one, this.materials.test.override({color: red}));
+
+        }
     }
 }
 
