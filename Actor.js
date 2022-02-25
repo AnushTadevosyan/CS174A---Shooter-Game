@@ -76,7 +76,7 @@ class Bullet extends Actor {
 
 class Enemy extends Actor {
     constructor(height, size, speed) {
-        super(tuple3(20, 0, height), tuple3(0, 0, 0), size);
+        super(tuple3(15, height, 0), tuple3(0, 0, 0), size);
         this.speed = -1 * speed;
         // this.angle = angle;
         this.start = this.get_coordinates();

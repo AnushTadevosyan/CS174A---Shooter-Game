@@ -40,7 +40,7 @@ export class Assignment3 extends Scene {
 
         this.initial_camera_location = Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90));
 
-        this.test_enemy = new Enemy(0, 1, .5);
+        this.enemies = new Array();
     }
 
     make_control_panel() {
@@ -92,7 +92,6 @@ export class Assignment3 extends Scene {
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
         const t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
-        this.test_enemy.update(t, dt);
         const yellow = hex_color("#fac91a");
         const red = hex_color("#FF0000");
 
@@ -108,13 +107,24 @@ export class Assignment3 extends Scene {
         let model_one = Mat4.identity();
         model_one = model_one.times(Mat4.translation(0,-8,-1));
 
-        this.draw_actor(this.test_enemy, this.shapes.sphere, context, program_state);
+        let rng = Math.random();
 
+        if (rng < 0.01) {
+            this.enemies.push(new Enemy(Math.floor(Math.random() * 20 - 3), .3, 5));
+        }
+
+        for (let i = 0; i < this.enemies.length; i++) {
+            this.enemies[i].update(t, dt);
+            this.draw_actor(this.enemies[i], this.shapes.sphere, context, program_state);
+        }
+
+        /*
         for(var i = 0; i <4; i++){
             model_one = model_one.times(Mat4.translation(0,3,-1));
             this.shapes.sphere.draw(context, program_state, model_one, this.materials.test.override({color: red}));
 
         }
+        */
     }
 }
 
