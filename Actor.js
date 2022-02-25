@@ -60,7 +60,7 @@ class Actor {
 // what the player actually shoots
 class Bullet extends Actor {
     constructor(coordinates, size, speed, angle) {
-        super(coordinates, new vec3(0,0,0), size);
+        super(coordinates, new vec3(0, 0, 0), size);
         this.speed = speed;
         this.angle = angle;
         this.start = new vec3(coordinates.x, coordinates.y, coordinates.z);
@@ -73,5 +73,15 @@ class Bullet extends Actor {
 };
 
 class Enemy extends Actor {
+    constructor(y_position, size, angle) {
+        super(coordinates, new vec3(0, y_position, 0), size);
+        this.speed = -1 * speed;
+        this.angle = angle;
+        this.start = new vec3(coordinates.x, coordinates.y, coordinates.z);
+    }
 
+    update(t, dt) {
+        this.start.x += dt * this.speed;
+        this.start.y += dt * this.speed;
+    }
 }
