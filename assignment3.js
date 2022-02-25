@@ -40,6 +40,8 @@ export class Assignment3 extends Scene {
 
         this.initial_camera_location = Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90));
 
+        this.lock_screen = false;
+
         this.enemies = new Array();
 
         this.bullets = new Array();
@@ -67,6 +69,7 @@ export class Assignment3 extends Scene {
         this.key_triggered_button("Move Down", ["k"], this.move_down);
         this.key_triggered_button("Shoot", ["j"], () => { this.shoot_bullet() });
         this.key_triggered_button("Pause", ["p"], () => { });
+        this.key_triggered_button("Lock Screen", ["q"], () => {this.lock_screen = !this.lock_screen});
     }
 
     move_up() {
@@ -97,6 +100,9 @@ export class Assignment3 extends Scene {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
 
             program_state.set_camera(this.initial_camera_location);
+        }   
+        if (this.lock_screen) {
+            program_state.set_camera(Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90)));
         }
 
         program_state.projection_transform = Mat4.perspective(
