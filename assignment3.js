@@ -17,7 +17,14 @@ export class Assignment3 extends Scene {
             circle: new defs.Regular_2D_Polygon(1, 15),
             // TODO:  Fill in as many additional shape instances as needed in this key/value table.
             //        (Requirement 1)
+
+            //blaster: 
         };
+
+        this.model_transform = Mat4.identity().times(Mat4.translation(-15,-1,0));
+
+        this.blaster = new defs.Subdivision_Sphere(4);
+        
 
         // *** Materials
         this.materials = {
@@ -44,6 +51,20 @@ export class Assignment3 extends Scene {
         // this.key_triggered_button("Attach to planet 4", ["Control", "4"], () => this.attached = () => this.planet_4);
         // this.new_line();
         // this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.moon);
+
+        this.key_triggered_button( "Move Up", [ "i" ], this.move_up );
+        this.key_triggered_button( "Move Down", [ "k" ], this.move_down );
+        this.key_triggered_button( "Start Game", [ "g" ], () => {});
+    }
+
+    move_up() {
+        this.model_transform = this.model_transform.times(Mat4.translation(0.3,1,0))
+        
+    }
+
+    move_down() {
+        this.model_transform = this.model_transform.times(Mat4.translation(-0.3,-1,0))
+        
     }
 
     display(context, program_state) {
@@ -67,10 +88,11 @@ export class Assignment3 extends Scene {
         const red = hex_color("#FF0000");
 
         // the shooting object
-        let model_transform = Mat4.identity();
-        model_transform = model_transform.times(Mat4.translation(-15,-1,0))
+        //let model_transform = Mat4.identity();
+        //this.model_transform = model_transform.times(Mat4.translation(-15,-1,0))
 
-        this.shapes.sphere.draw(context, program_state, model_transform, this.materials.test.override({color: yellow}));
+        
+        this.blaster.draw(context, program_state, this.model_transform, this.materials.test.override({color: yellow}));
 
 
         //the objects that are being shooted
