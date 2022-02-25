@@ -85,3 +85,5 @@ class Enemy extends Actor {
         this.start.y += dt * this.speed;
     }
 }
+
+export { Bullet, Enemy }
