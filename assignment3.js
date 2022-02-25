@@ -1,4 +1,5 @@
 import {defs, tiny} from './examples/common.js';
+import { Bullet } from './Actor.js';
 
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene,
@@ -37,7 +38,7 @@ export class Assignment3 extends Scene {
             //        (Requirement 4)
         }
 
-        this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
+        this.initial_camera_location = Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90));
     }
 
     make_control_panel() {
@@ -58,12 +59,12 @@ export class Assignment3 extends Scene {
     }
 
     move_up() {
-        this.model_transform = this.model_transform.times(Mat4.translation(0.3,1,0))
+        this.model_transform = this.model_transform.times(Mat4.translation(0,1,0))
         
     }
 
     move_down() {
-        this.model_transform = this.model_transform.times(Mat4.translation(-0.3,-1,0))
+        this.model_transform = this.model_transform.times(Mat4.translation(0,-1,0))
         
     }
 
