@@ -1,4 +1,5 @@
 import {defs, tiny} from './examples/common.js';
+import { Bullet, Enemy } from './Actor.js';
 
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene,
@@ -37,7 +38,9 @@ export class Assignment3 extends Scene {
             //        (Requirement 4)
         }
 
-        this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
+        this.initial_camera_location = Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90));
+
+        this.enemies = new Array();
     }
 
     make_control_panel() {
@@ -58,13 +61,18 @@ export class Assignment3 extends Scene {
     }
 
     move_up() {
-        this.model_transform = this.model_transform.times(Mat4.translation(0.3,1,0))
-        
+        this.model_transform = this.model_transform.times(Mat4.translation(0,1,0))
     }
 
     move_down() {
-        this.model_transform = this.model_transform.times(Mat4.translation(-0.3,-1,0))
-        
+        this.model_transform = this.model_transform.times(Mat4.translation(0,-1,0))
+    }
+
+    draw_actor(actor, shape, context, program_state) {
+        let coords = actor.get_coordinates();
+        let s = actor.get_radius() * 2;
+        let model_transform = Mat4.translation(coords.x, coords.y, coords.z).times(Mat4.scale(s, s, s));
+        shape.draw(context, program_state, model_transform, this.materials.test.override({color: hex_color("#FF0000")}));
     }
 
     display(context, program_state) {
@@ -99,11 +107,24 @@ export class Assignment3 extends Scene {
         let model_one = Mat4.identity();
         model_one = model_one.times(Mat4.translation(0,-8,-1));
 
+        let rng = Math.random();
+
+        if (rng < 0.01) {
+            this.enemies.push(new Enemy(Math.floor(Math.random() * 20 - 3), .3, 5));
+        }
+
+        for (let i = 0; i < this.enemies.length; i++) {
+            this.enemies[i].update(t, dt);
+            this.draw_actor(this.enemies[i], this.shapes.sphere, context, program_state);
+        }
+
+        /*
         for(var i = 0; i <4; i++){
             model_one = model_one.times(Mat4.translation(0,3,-1));
             this.shapes.sphere.draw(context, program_state, model_one, this.materials.test.override({color: red}));
 
         }
+        */
     }
 }
 
