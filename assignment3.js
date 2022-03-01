@@ -1,8 +1,9 @@
 import { defs, tiny } from './examples/common.js';
 import { Bullet, Enemy, Player } from './Actor.js';
+import { Text_Line } from './examples/text-demo.js';
 
 const {
-    Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene,
+    Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture
 } = tiny;
 
 export class Assignment3 extends Scene {
@@ -18,13 +19,12 @@ export class Assignment3 extends Scene {
             circle: new defs.Regular_2D_Polygon(1, 15),
             // TODO:  Fill in as many additional shape instances as needed in this key/value table.
             //        (Requirement 1)
-
-            //blaster: 
+            text: new Text_Line(15)
         };
 
         this.model_transform = Mat4.identity().times(Mat4.translation(-15, -1, 0));
 
-        this.blaster = new defs.Subdivision_Sphere(4);
+        //this.blaster = new defs.Subdivision_Sphere(4);
 
 
         // *** Materials
@@ -36,7 +36,17 @@ export class Assignment3 extends Scene {
             ring: new Material(new Ring_Shader()),
             // TODO:  Fill in as many additional material objects as needed in this key/value table.
             //        (Requirement 4)
-        }
+
+            text_mat: new Material(new defs.Textured_Phong(1),
+                { ambient: 1, diffusivity: 0, specularity: 0, texture: new Texture("assets/text.png") })
+        };
+        // const texture = new defs.Textured_Phong(1);
+
+        // // To show text you need a Material like this one:
+        // this.text_image = new Material(texture, {
+        //     ambient: 1, diffusivity: 0, specularity: 0,
+        //     texture: new Texture("assets/text.png")
+        // });
 
         this.initial_camera_location = Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90));
 
@@ -49,6 +59,8 @@ export class Assignment3 extends Scene {
         this.player = new Player();
 
         this.stars = new Array();
+
+        this.kills = 0;
     }
 
     make_control_panel() {
@@ -118,12 +130,11 @@ export class Assignment3 extends Scene {
         const red = hex_color("#FF0000");
 
         // the shooting object
-        //let model_transform = Mat4.identity();
-        //this.model_transform = model_transform.times(Mat4.translation(-15,-1,0))
 
         this.player.update();
         let pc = this.player.get_coordinates();
-        this.blaster.draw(context, program_state, Mat4.translation(pc.x, pc.y, pc.z), this.materials.test.override({ color: yellow }));
+        this.draw_actor(this.player, this.shapes.sphere, this.materials.test.override({ color: yellow }),context,program_state);
+        //this.blaster.draw(context, program_state, Mat4.translation(pc.x, pc.y, pc.z), this.materials.test.override({ color: yellow }));
 
 
         //the objects that are being shooted
@@ -162,6 +173,7 @@ export class Assignment3 extends Scene {
                 for (let j = 0; j < this.enemies.length; j++) {
                     if (this.enemies[j].is_alive() && b.collided(this.enemies[j])) {
                         this.enemies[j].add_damage(25);
+                        this.kills = this.kills+1;
                         b.kill();
                     }
                 }
@@ -180,6 +192,11 @@ export class Assignment3 extends Scene {
 
         }
         */
+
+        let model_transform = Mat4.identity().times(Mat4.translation(-19,-7,0)).times(Mat4.scale(0.5,0.5,0.5));
+
+        this.shapes.text.set_string("Score: " + this.kills.toString(),context.context);
+        this.shapes.text.draw(context,program_state,model_transform,this.materials.text_mat);
     }
 }
 
