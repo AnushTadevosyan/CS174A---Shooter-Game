@@ -41,13 +41,6 @@ export class Assignment3 extends Scene {
             text_mat: new Material(new defs.Textured_Phong(1),
                 { ambient: 1, diffusivity: 0, specularity: 0, texture: new Texture("assets/text.png") })
         };
-        // const texture = new defs.Textured_Phong(1);
-
-        // // To show text you need a Material like this one:
-        // this.text_image = new Material(texture, {
-        //     ambient: 1, diffusivity: 0, specularity: 0,
-        //     texture: new Texture("assets/text.png")
-        // });
 
         this.initial_camera_location = Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90));
 
@@ -96,6 +89,7 @@ export class Assignment3 extends Scene {
     reset() {
         this.start = true;
 
+        //refresh everything
         this.paused = false;
         this.lock_screen = false;
         this.enemies = new Array();
@@ -231,19 +225,21 @@ export class Assignment3 extends Scene {
                 for (let i = 0; i < this.stars.length; i++) {
                     this.draw_actor(this.stars[i], this.shapes.sphere, this.materials.test.override({ color: hex_color("#FFFFFF") }), context, program_state);
                 }
-    
-                let pause_L1 = Mat4.identity().times(Mat4.translation(-10,1,0)).times(Mat4.scale(1,1,1));
-                let pause_L2 = Mat4.identity().times(Mat4.translation(-9.25,-1,0)).times(Mat4.scale(1,1,1));
+
+
+                //display "game is paused" text
+                let pause_L1 = Mat4.identity().times(Mat4.translation(-10,1,0.5)).times(Mat4.scale(1,1,1));
+                let pause_L2 = Mat4.identity().times(Mat4.translation(-9.25,-1,0.5)).times(Mat4.scale(1,1,1));
                 this.shapes.text.set_string("Game Is",context.context);
                 this.shapes.text2.set_string("Paused",context.context);
                 this.shapes.text.draw(context, program_state, pause_L1, this.materials.text_mat);
                 this.shapes.text2.draw(context,program_state,pause_L2,this.materials.text_mat);
             }
-    
-            let model_transform = Mat4.identity().times(Mat4.translation(-19,-7,0)).times(Mat4.scale(0.5,0.5,0.5));
-    
+            
+            //display score
+            let score_model = Mat4.identity().times(Mat4.translation(-19,-7,0)).times(Mat4.scale(0.5,0.5,0.5));
             this.shapes.text.set_string("Score: " + this.kills.toString(),context.context);
-            this.shapes.text.draw(context,program_state,model_transform,this.materials.text_mat);
+            this.shapes.text.draw(context,program_state,score_model,this.materials.text_mat);
         }
         
         //player has not yet started their first game
