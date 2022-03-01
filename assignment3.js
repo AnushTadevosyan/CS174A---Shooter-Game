@@ -19,7 +19,8 @@ export class Assignment3 extends Scene {
             circle: new defs.Regular_2D_Polygon(1, 15),
             // TODO:  Fill in as many additional shape instances as needed in this key/value table.
             //        (Requirement 1)
-            text: new Text_Line(15)
+            text: new Text_Line(15),
+            text2: new Text_Line(15)
         };
 
         this.model_transform = Mat4.identity().times(Mat4.translation(-15, -1, 0));
@@ -50,16 +51,14 @@ export class Assignment3 extends Scene {
 
         this.initial_camera_location = Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90));
 
+        this.start = false;
+        this.paused = false;
         this.lock_screen = false;
-
+        
         this.enemies = new Array();
-
         this.bullets = new Array();
-
         this.player = new Player();
-
         this.stars = new Array();
-
         this.kills = 0;
     }
 
@@ -76,23 +75,35 @@ export class Assignment3 extends Scene {
         // this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.moon);
 
 
-        this.key_triggered_button("Start Game", ["g"], () => { });
+        this.key_triggered_button("New Game", ["g"], () => this.reset());
+        this.key_triggered_button("Pause/Unpause", ["u"], () => {this.paused = !this.paused});
         this.key_triggered_button("Move Up", ["i"], this.move_up);
         this.key_triggered_button("Move Down", ["k"], this.move_down);
         this.key_triggered_button("Shoot", ["j"], () => { this.shoot_bullet() });
-        this.key_triggered_button("Pause", ["p"], () => { });
         this.key_triggered_button("Lock Screen", ["q"], () => {this.lock_screen = !this.lock_screen});
     }
 
     move_up() {
-        if(this.player.coords.y<7.5)
+        if(this.player.coords.y<7.5 && !this.paused)
             this.player.move_up();
     }
 
     move_down() {
-        if(this.player.coords.y>-7.5)
+        if(this.player.coords.y>-7.5 && !this.paused)
             this.player.move_down();
-    }   
+    }
+
+    reset() {
+        this.start = true;
+
+        this.paused = false;
+        this.lock_screen = false;
+        this.enemies = new Array();
+        this.bullets = new Array();
+        this.player = new Player();
+        this.stars = new Array();
+        this.kills = 0;
+    }
 
     shoot_bullet() {
         let c = this.player.get_coordinates();
@@ -113,9 +124,6 @@ export class Assignment3 extends Scene {
 
             program_state.set_camera(this.initial_camera_location);
         }   
-        if (this.lock_screen) {
-            program_state.set_camera(Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90)));
-        }
 
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, .1, 1000);
@@ -126,78 +134,131 @@ export class Assignment3 extends Scene {
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
         const t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
-        const yellow = hex_color("#fac91a");
-        const red = hex_color("#FF0000");
+        
+        //player has begun the game
+        if(this.start) { 
 
-        // the shooting object
-
-        this.player.update();
-        let pc = this.player.get_coordinates();
-        this.draw_actor(this.player, this.shapes.sphere, this.materials.test.override({ color: yellow }),context,program_state);
-        //this.blaster.draw(context, program_state, Mat4.translation(pc.x, pc.y, pc.z), this.materials.test.override({ color: yellow }));
-
-
-        //the objects that are being shooted
-        let model_one = Mat4.identity();
-        model_one = model_one.times(Mat4.translation(0, -8, -1));
-
-        let rng = Math.random();
-
-        // there is a 1% chance that a new "enemy" will spawn at a random height
-        if (rng < 0.01) {
-            this.enemies.push(new Enemy(Math.floor(Math.random() * 20 - 3), .3, 5));
-        }
-        if (rng < 0.10) {
-            // temporarily use enemies as placeholders for background
-            // TODO: make proper star actor
-            let s = new Enemy(Math.floor(Math.random() * 30 - 10), .02, 10);
-            s.coords.z = -2 // forcibly move to behind playfield. Replace later
-            this.stars.push(s);
-        }
-
-        for (let i = 0; i < this.enemies.length; i++) {
-            if (this.enemies[i].is_alive()) {
-                this.enemies[i].update(t, dt);
-                this.draw_actor(this.enemies[i], this.shapes.sphere, this.materials.test.override({ color: hex_color("#FF0000") }), context, program_state);
+            if (this.lock_screen) {
+                program_state.set_camera(Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90)));
             }
-        }
 
-        for (let i = 0; i < this.bullets.length; i++) {
-            let b = this.bullets[i];
-
-            b.update(t, dt);
-
-            if (b.is_alive()) {
-                this.draw_actor(b, this.shapes.sphere, this.materials.test.override({ color: hex_color("#00FF00") }), context, program_state);
-                // kill this bullet if it collided with an enemy
-                for (let j = 0; j < this.enemies.length; j++) {
-                    if (this.enemies[j].is_alive() && b.collided(this.enemies[j])) {
-                        this.enemies[j].add_damage(25);
-                        this.kills = this.kills+1;
-                        b.kill();
+            const yellow = hex_color("#fac91a");
+            const red = hex_color("#FF0000");
+    
+            // the shooting object
+    
+            this.player.update();
+            let pc = this.player.get_coordinates();
+            this.draw_actor(this.player, this.shapes.sphere, this.materials.test.override({ color: yellow }),context,program_state);
+            //this.blaster.draw(context, program_state, Mat4.translation(pc.x, pc.y, pc.z), this.materials.test.override({ color: yellow }));
+    
+    
+            //the objects that are being shooted
+            let model_one = Mat4.identity();
+            model_one = model_one.times(Mat4.translation(0, -8, -1));
+            
+            //game is unpaused
+            if(!this.paused) { 
+                let rng = Math.random();
+    
+                // there is a 1% chance that a new "enemy" will spawn at a random height
+                if (rng < 0.01) {
+                    this.enemies.push(new Enemy(Math.floor(Math.random() * 20 - 3), .3, 5));
+                }
+                if (rng < 0.10) {
+                    // temporarily use enemies as placeholders for background
+                    // TODO: make proper star actor
+                    let s = new Enemy(Math.floor(Math.random() * 30 - 10), .02, 10);
+                    s.coords.z = -2 // forcibly move to behind playfield. Replace later
+                    this.stars.push(s);
+                }
+    
+                for (let i = 0; i < this.enemies.length; i++) {
+                    if (this.enemies[i].is_alive()) {
+                        this.enemies[i].update(t, dt);
+                        this.draw_actor(this.enemies[i], this.shapes.sphere, this.materials.test.override({ color: hex_color("#FF0000") }), context, program_state);
                     }
                 }
+    
+                for (let i = 0; i < this.bullets.length; i++) {
+                    let b = this.bullets[i];
+    
+                    b.update(t, dt);
+    
+                    if (b.is_alive()) {
+                        this.draw_actor(b, this.shapes.sphere, this.materials.test.override({ color: hex_color("#00FF00") }), context, program_state);
+                        // kill this bullet if it collided with an enemy
+                        for (let j = 0; j < this.enemies.length; j++) {
+                            if (this.enemies[j].is_alive() && b.collided(this.enemies[j])) {
+                                this.enemies[j].add_damage(25);
+                                this.kills = this.kills+1;
+                                b.kill();
+                            }
+                        }
+                    }
+                }
+    
+                for (let i = 0; i < this.stars.length; i++) {
+                    this.stars[i].update(t, dt);
+                    this.draw_actor(this.stars[i], this.shapes.sphere, this.materials.test.override({ color: hex_color("#FFFFFF") }), context, program_state);
+                }
             }
+
+            //game is paused
+            else { 
+                for (let i = 0; i < this.enemies.length; i++) {
+                    if (this.enemies[i].is_alive()) {
+                        this.draw_actor(this.enemies[i], this.shapes.sphere, this.materials.test.override({ color: hex_color("#FF0000") }), context, program_state);
+                    }
+                }
+    
+                for (let i = 0; i < this.bullets.length; i++) {
+                    let b = this.bullets[i];
+    
+                    if (b.is_alive()) {
+                        this.draw_actor(b, this.shapes.sphere, this.materials.test.override({ color: hex_color("#00FF00") }), context, program_state);
+                        // kill this bullet if it collided with an enemy
+                        for (let j = 0; j < this.enemies.length; j++) {
+                            if (this.enemies[j].is_alive() && b.collided(this.enemies[j])) {
+                                this.enemies[j].add_damage(25);
+                                this.kills = this.kills+1;
+                                b.kill();
+                            }
+                        }
+                    }
+                }
+    
+                for (let i = 0; i < this.stars.length; i++) {
+                    this.draw_actor(this.stars[i], this.shapes.sphere, this.materials.test.override({ color: hex_color("#FFFFFF") }), context, program_state);
+                }
+    
+                let pause_L1 = Mat4.identity().times(Mat4.translation(-10,1,0)).times(Mat4.scale(1,1,1));
+                let pause_L2 = Mat4.identity().times(Mat4.translation(-9.25,-1,0)).times(Mat4.scale(1,1,1));
+                this.shapes.text.set_string("Game Is",context.context);
+                this.shapes.text2.set_string("Paused",context.context);
+                this.shapes.text.draw(context, program_state, pause_L1, this.materials.text_mat);
+                this.shapes.text2.draw(context,program_state,pause_L2,this.materials.text_mat);
+            }
+    
+            let model_transform = Mat4.identity().times(Mat4.translation(-19,-7,0)).times(Mat4.scale(0.5,0.5,0.5));
+    
+            this.shapes.text.set_string("Score: " + this.kills.toString(),context.context);
+            this.shapes.text.draw(context,program_state,model_transform,this.materials.text_mat);
         }
-
-        for (let i = 0; i < this.stars.length; i++) {
-            this.stars[i].update(t, dt);
-            this.draw_actor(this.stars[i], this.shapes.sphere, this.materials.test.override({ color: hex_color("#FFFFFF") }), context, program_state);
+        
+        //player has not yet started their first game
+        else { 
+            let new_game_L1 = Mat4.identity().times(Mat4.translation(-10,1,0)).times(Mat4.scale(1,1,1));
+            let new_game_L2 = Mat4.identity().times(Mat4.translation(-10.75,-1,0)).times(Mat4.scale(1,1,1));
+    
+            this.shapes.text.set_string("Press g",context.context);
+            this.shapes.text2.set_string("to Begin",context.context);
+            this.shapes.text.draw(context, program_state, new_game_L1, this.materials.text_mat);
+            this.shapes.text2.draw(context,program_state,new_game_L2,this.materials.text_mat);
         }
-
-        /*
-        for(var i = 0; i <4; i++){
-            model_one = model_one.times(Mat4.translation(0,3,-1));
-            this.shapes.sphere.draw(context, program_state, model_one, this.materials.test.override({color: red}));
-
-        }
-        */
-
-        let model_transform = Mat4.identity().times(Mat4.translation(-19,-7,0)).times(Mat4.scale(0.5,0.5,0.5));
-
-        this.shapes.text.set_string("Score: " + this.kills.toString(),context.context);
-        this.shapes.text.draw(context,program_state,model_transform,this.materials.text_mat);
     }
+        
+        
 }
 
 class Gouraud_Shader extends Shader {
