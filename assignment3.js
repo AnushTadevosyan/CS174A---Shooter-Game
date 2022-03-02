@@ -72,8 +72,24 @@ export class Assignment3 extends Scene {
         this.key_triggered_button("Pause/Unpause", ["u"], () => {this.paused = !this.paused});
         this.key_triggered_button("Move Up", ["i"], this.move_up);
         this.key_triggered_button("Move Down", ["k"], this.move_down);
-        this.key_triggered_button("Shoot", ["j"], () => { this.shoot_bullet() });
+        //this.key_triggered_button("Move Right", ["]"], this.move_right);
+        //this.key_triggered_button("Move Left", ["["], this.move_left);
+        this.key_triggered_button("Shoot", ["j"], () => { this.shoot_bullet(0) });
         this.key_triggered_button("Lock Screen", ["q"], () => {this.lock_screen = !this.lock_screen});
+    }
+
+    my_mouse_down(e, pos, context, program_state) {
+        //HARD CODED BASED ON SCREEN DIMENSIONS: (-20<x<9, -7.5<y<7.5)
+        //IF SCREEN DIMENSIONS CHANGE, THIS NEEDS TO BE CHANGED
+        let mouse_x = (pos[0] * 15) - 5.5;
+        let mouse_y = (pos[1] * 7.5);
+
+        let x_diff = (mouse_x - this.player.coords.x);
+        let y_diff = (mouse_y - this.player.coords.y);
+        let bullet_angle = Math.atan(y_diff/x_diff);
+
+        if (x_diff > 0) 
+            this.shoot_bullet(bullet_angle);
     }
 
     move_up() {
@@ -86,6 +102,16 @@ export class Assignment3 extends Scene {
             this.player.move_down();
     }
 
+/*     move_right() {
+        if(this.player.coords.x<9 && !this.paused)
+            this.player.move_right();
+    }
+
+    move_left() {
+        if(this.player.coords.x>-20 && !this.paused)
+            this.player.move_left();
+    } */
+    
     reset() {
         this.start = true;
 
@@ -99,9 +125,9 @@ export class Assignment3 extends Scene {
         this.kills = 0;
     }
 
-    shoot_bullet() {
+    shoot_bullet(angle) {
         let c = this.player.get_coordinates();
-        this.bullets.push(new Bullet({ x: c.x, y: c.y, z: c.z }, .2, 6, 0));
+        this.bullets.push(new Bullet({ x: c.x, y: c.y, z: c.z }, .2, 6, angle));
     }
 
     draw_actor(actor, shape, mat, context, program_state) {
@@ -117,11 +143,23 @@ export class Assignment3 extends Scene {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
 
             program_state.set_camera(this.initial_camera_location);
+
+            // Mouse picking
+            let canvas = context.canvas;
+            const mouse_position = (e, rect = canvas.getBoundingClientRect()) =>
+                vec((e.clientX - (rect.left + rect.right) / 2) / ((rect.right - rect.left) / 2),
+                    (e.clientY - (rect.bottom + rect.top) / 2) / ((rect.top - rect.bottom) / 2));
+
+            canvas.addEventListener("mousedown", e => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                this.my_mouse_down(e, mouse_position(e), context, program_state);
+            });
+
         }   
 
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, .1, 1000);
-
 
         const light_position = vec4(0, 5, 5, 1);
 

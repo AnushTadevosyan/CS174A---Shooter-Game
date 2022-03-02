@@ -90,10 +90,14 @@ class Player extends Actor {
     constructor() {
         super(tuple3(-15,-1,0), tuple3(0,0,0), 1);
     }
-
     move_up(amount = 1) { this.coords.y += amount; }
 
     move_down(amount = 1) { this.coords.y -= amount; }
+
+    move_right(amount = 1) { this.coords.x += amount; }
+
+    move_left(amount = 1) { this.coords.x -= amount; }
+
 }
 
 export { Bullet, Enemy, Player }
