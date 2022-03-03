@@ -112,18 +112,6 @@ class Linked_List {
 
         return n;
     }
-
-    // returns an array of all items in the list
-    to_array() {
-        let result = new Array();
-
-        while (!this.is_empty()) {
-            result.push(this.head);
-            this.head.delete();
-        }
-
-        return result;
-    }
 }
 
 class Actor_Manager {
