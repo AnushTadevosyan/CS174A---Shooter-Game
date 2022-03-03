@@ -47,7 +47,7 @@ class Actor {
 
     get_radius() { return this.collider_radius; }
 
-    static get_type_static() { return "None;" }
+    static get_type_static() { return "None"; }
 
     // wrapper to call get_type_static from class instances
     get_type() { return this.constructor.get_type_static(); }

@@ -4,22 +4,15 @@ class Node {
         this.prev = prev;
         this.item = item;
     }
-
-    // delete this node from the list
-    delete() {
-        if (this.next) {
-            this.next.prev = this.prev;
-        }
-        if (this.prev) {
-            this.prev.next = this.next;
-        }
-    }
 }
 
 class Linked_List {
     constructor() {
         this.head = null;
         this.tail = null;
+
+        // quick access to any arbitrary node
+        this.node_set = new Set();
     }
 
     is_empty() { return this.head == null && this.tail == null; }
@@ -54,6 +47,8 @@ class Linked_List {
             this.tail = this.head;
         }
 
+        this.node_set.add(n);
+
         return n;
     }
 
@@ -71,6 +66,49 @@ class Linked_List {
             this.head = n;
             this.tail = this.head;
         }
+
+        this.node_set.add(n);
+
+        return n;
+    }
+
+    // quick delete node by reference
+    delete(node) {
+        if (this.node_set.has(node)) {
+            
+            if (node.next) {
+                node.next.prev = node.prev;
+            }
+
+            if (node.prev) {
+                node.prev.next = node.next
+            }
+
+            if (this.head == node) {
+                this.head = node.next;
+            }
+
+            if (this.tail == node) {
+                this.tail = node.prev;
+            }
+
+            this.node_set.delete(node);
+            
+        }
+    }
+
+    pop_back() {
+        let n = this.tail;
+
+        this.delete(n);
+
+        return n;
+    }
+
+    pop_front() {
+        let n = this.head;
+
+        this.delete(n);
 
         return n;
     }
@@ -121,7 +159,7 @@ class Actor_Manager {
         this.actor_to_category_node.set(actor, cat_node);
     }
 
-    // runs update function on each actor and culls dead actors from the list
+    // runs update function on each actor
     update_actor_list(t, dt) {
         let curr = this.actor_list.head;
 
@@ -129,18 +167,32 @@ class Actor_Manager {
 
             let actor = curr.item;
 
-            // this actor is dead; remove it!
-            if (!actor.is_alive()) {
-                this.actor_to_list_node.get(actor).delete();
-                this.actor_to_list_node.delete(actor);
-                this.actor_to_category_node.get(actor).delete();
-                this.actor_to_category_node.delete(actor);
-            }
-
             actor.update(t, dt);
 
             curr = curr.next;
         }
+    }
+
+    cull_dead_actors() {
+        let curr = this.actor_list.head;
+
+        while (curr != null) {
+
+            let actor = curr.item;
+
+            if (!actor.is_alive()) {
+                this.actor_list.delete(this.actor_to_list_node.get(actor));
+                this.actor_to_list_node.delete(actor);
+                this.actor_categories.get(actor.get_type()).delete(this.actor_to_category_node.get(actor));
+                this.actor_to_category_node.delete(actor);
+            }
+
+            curr = curr.next;
+        }
+    }
+
+    get_num_loaded_actors() {
+        return this.actor_list.node_set.size;
     }
 }
 

@@ -87,6 +87,9 @@ export class Assignment3 extends Scene {
         //this.key_triggered_button("Move Left", ["["], this.move_left);
         this.key_triggered_button("Shoot", ["j"], () => { this.shoot_bullet(0) });
         this.key_triggered_button("Lock Screen", ["q"], () => {this.lock_screen = !this.lock_screen});
+
+        // debug
+        // this.key_triggered_button("Spawn Enemy", ["b"], () => { this.actor_manager.add_actor(new Enemy(Math.floor(Math.random() * 15 - 3), .3, 5)); });
     }
 
     my_mouse_down(e, pos, context, program_state) {
@@ -148,7 +151,7 @@ export class Assignment3 extends Scene {
 
     draw_actor(actor, shape, mat, context, program_state) {
         let coords = actor.get_coordinates();
-        let s = actor.get_radius() * 2;
+        let s = actor.get_radius();
         let model_transform = Mat4.translation(coords.x, coords.y, coords.z).times(Mat4.scale(s, s, s));
         shape.draw(context, program_state, model_transform, mat);
     }
@@ -215,8 +218,10 @@ export class Assignment3 extends Scene {
 
                     let curr_bullet = curr_bullet_node.item;
 
-                    if (curr_enemy.collided(curr_bullet)) {
+                    if (curr_bullet.is_alive() && curr_enemy.is_alive() && curr_enemy.collided(curr_bullet)) {
                         curr_enemy.add_damage(25);
+
+                        // add point if enemy was killed
                         if (!curr_enemy.is_alive()) {
                             this.kills++;
                         }
@@ -227,6 +232,10 @@ export class Assignment3 extends Scene {
                 }
 
                 curr_enemy_node = curr_enemy_node.next;
+            }
+
+            if (this.actor_manager.get_num_loaded_actors() > 1000) {
+                this.actor_manager.cull_dead_actors();
             }
 
             //game is paused
@@ -242,9 +251,9 @@ export class Assignment3 extends Scene {
             else {
                 let rng = Math.random();
 
-                // there is a 1% chance that a new "enemy" will spawn at a random height
-                if (rng < 0.01) {
-                    this.actor_manager.add_actor(new Enemy(Math.floor(Math.random() * 15 - 3), .3, 5));
+                // there is a .5% chance that a new "enemy" will spawn at a random height
+                if (rng < 0.005) {
+                    this.actor_manager.add_actor(new Enemy(Math.floor(Math.random() * 10 - 3), .3, 5));
                 }
                 if (rng < 0.10) {
                     this.actor_manager.add_actor(new Star(Math.floor(Math.random() * 30 - 10), .02, 10))
