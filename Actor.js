@@ -29,7 +29,6 @@ class Actor {
     // this implementation uses spheres because it's easy
     // to check and rotation doesn't matter
     collided(other_actor) {
-        // let's assume these are Vec3 objects for now...
         let other_center = other_actor.get_coordinates();
         let this_center = this.get_coordinates();
 
@@ -47,6 +46,11 @@ class Actor {
     get_hitbox_size() { return undefined }
 
     get_radius() { return this.collider_radius; }
+
+    static get_type_static() { return "None;" }
+
+    // wrapper to call get_type_static from class instances
+    get_type() { return this.constructor.get_type_static(); }
 
     kill() { this.alive = false; }
 
@@ -66,24 +70,40 @@ class Bullet extends Actor {
         super(coordinates, tuple3(0, 0, 0), size);
         this.speed = speed;
         this.angle = angle;
+
+        // delete bullet based on how long it's been on screen
+        // maybe replace with detecting when off screen?
+        this.age = 0; 
+                      
     }
 
     update(t, dt) {
         this.coords.x += dt * this.speed * Math.cos(this.angle);
         this.coords.y += dt * this.speed * Math.sin(this.angle);
+
+        this.age += dt;
+
+        if (this.age > 10) {
+            this.kill();
+        }
     }
+
+    static get_type_static() { return "Bullet"; }
 };
 
 class Enemy extends Actor {
     constructor(height, size, speed) {
         super(tuple3(15, height, 0), tuple3(0, 0, 0), size);
         this.speed = -1 * speed;
-        // this.angle = angle;
     }
 
     update(t, dt) {
         this.coords.x += dt * this.speed;
+
+        if (this.coords.x < -25) this.kill();
     }
+
+    static get_type_static() { return "Enemy"; }
 }
 
 class Player extends Actor {
@@ -98,6 +118,23 @@ class Player extends Actor {
 
     move_left(amount = 1) { this.coords.x -= amount; }
 
+    static get_type_static() { return "Player"; }
 }
 
-export { Bullet, Enemy, Player }
+class Star extends Actor {
+
+    constructor(height, size, speed) {
+        super(tuple3(15, height, -2), tuple3(0, 0, 0), size);
+        this.speed = -1 * speed;
+    }
+
+    update(t, dt) {
+        this.coords.x += dt * this.speed;
+
+        if (this.coords.x < -25) this.kill();
+    }
+
+    static get_type_static() { return "Star"; }
+}
+
+export { Bullet, Enemy, Player, Star }
