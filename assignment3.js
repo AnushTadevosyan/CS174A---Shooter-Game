@@ -63,6 +63,10 @@ export class Assignment3 extends Scene {
             Star.get_type_static(), new Material(new defs.Phong_Shader(), 
             { ambient: 1, diffusivity: .6, color: hex_color("#FFFFFF") })
         );
+
+        this.controls = new Map();
+        this.controls["up"] = false;
+        this.controls["down"] = false;
         
     }
 
@@ -81,8 +85,8 @@ export class Assignment3 extends Scene {
 
         this.key_triggered_button("New Game", ["g"], () => this.reset());
         this.key_triggered_button("Pause/Unpause", ["u"], () => {this.paused = !this.paused});
-        this.key_triggered_button("Move Up", ["i"], this.move_up);
-        this.key_triggered_button("Move Down", ["k"], this.move_down);
+        this.key_triggered_button("Move Up", ["i"], () => { this.controls["up"] = true; }, undefined, () => { this.controls["up"] = false; });
+        this.key_triggered_button("Move Down", ["k"], () => { this.controls["down"] = true; }, undefined, () => { this.controls["down"] = false; });
         //this.key_triggered_button("Move Right", ["]"], this.move_right);
         //this.key_triggered_button("Move Left", ["["], this.move_left);
         this.key_triggered_button("Shoot", ["j"], () => { this.shoot_bullet(0) });
@@ -137,7 +141,7 @@ export class Assignment3 extends Scene {
         this.paused = false;
         this.lock_screen = false;
         this.kills = 0;
-        this.player = new Player();
+        this.player = new Player(this.controls);
         this.actor_manager = new Actor_Manager();
         this.actor_manager.add_actor(this.player);
         this.actor_manager.add_category(Enemy.get_type_static());

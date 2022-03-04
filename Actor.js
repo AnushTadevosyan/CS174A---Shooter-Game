@@ -107,8 +107,10 @@ class Enemy extends Actor {
 }
 
 class Player extends Actor {
-    constructor() {
+    constructor(controls) {
         super(tuple3(-15,-1,0), tuple3(0,0,0), 1);
+        this.controls = controls;
+        this.speed = 10;
     }
     move_up(amount = 1) { this.coords.y += amount; }
 
@@ -117,6 +119,18 @@ class Player extends Actor {
     move_right(amount = 1) { this.coords.x += amount; }
 
     move_left(amount = 1) { this.coords.x -= amount; }
+
+    update(t, dt) {
+
+        let move_amount = dt * this.speed;
+
+        if (this.controls["up"]) {
+            this.move_up(move_amount)
+        }
+        if (this.controls["down"]) {
+            this.move_down(move_amount);
+        }
+    }
 
     static get_type_static() { return "Player"; }
 }
