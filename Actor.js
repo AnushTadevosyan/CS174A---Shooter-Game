@@ -37,9 +37,11 @@ class Actor {
         let z_dist = other_center.z - this_center.z;
 
         // distance formula: d = sqrt(dx^2 + dy^2 + dz^2)
-        let d = Math.sqrt(x_dist * x_dist + y_dist * y_dist + z_dist * z_dist);
+        // square both sides to avoid sqrt call
+        let d = x_dist * x_dist + y_dist * y_dist + z_dist * z_dist;
+        let radius_distance = this.get_radius() + other_actor.get_radius();
 
-        return d < (this.get_radius() + other_actor.get_radius());
+        return d < (radius_distance * radius_distance);
     }
 
     // stub this for now
