@@ -114,9 +114,20 @@ class Player extends Actor {
         this.controls = controls;
         this.speed = 10;
     }
-    move_up(amount = 1) { this.coords.y += amount; }
 
-    move_down(amount = 1) { this.coords.y -= amount; }
+    move_up(amount = 1) { 
+        let new_height = this.coords.y + amount;
+        if (new_height < 7.5)
+            this.coords.y = new_height;
+        else this.coords.y = 7.5;
+    }
+
+    move_down(amount = 1) {
+        let new_height = this.coords.y - amount;
+        if (new_height > -7.5)
+            this.coords.y = new_height;
+        else this.coords.y = -7.5;
+    }
 
     move_right(amount = 1) { this.coords.x += amount; }
 
@@ -125,6 +136,9 @@ class Player extends Actor {
     update(t, dt) {
 
         let move_amount = dt * this.speed;
+
+        // clamp player movement
+        move_amount = (move_amount < 7.5) ? move_amount : 0;
 
         if (this.controls["up"]) {
             this.move_up(move_amount)
