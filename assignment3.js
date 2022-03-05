@@ -21,7 +21,8 @@ export class Assignment3 extends Scene {
             // TODO:  Fill in as many additional shape instances as needed in this key/value table.
             //        (Requirement 1)
             text: new Text_Line(15),
-            text2: new Text_Line(15)
+            text2: new Text_Line(15),
+            //text3: new Text_Line(15)
         };
 
         this.model_transform = Mat4.identity().times(Mat4.translation(-15, -1, 0));
@@ -84,6 +85,7 @@ export class Assignment3 extends Scene {
 
 
         this.key_triggered_button("New Game", ["g"], () => this.reset());
+        //this.key_triggered_button("Hard Mode/Endless Mode", ["h"], () => {this.hm = !this.hm});
         this.key_triggered_button("Pause/Unpause", ["u"], () => {this.paused = !this.paused});
         this.key_triggered_button("Move Up", ["i"], () => { this.controls["up"] = true; }, undefined, () => { this.controls["up"] = false; });
         this.key_triggered_button("Move Down", ["k"], () => { this.controls["down"] = true; }, undefined, () => { this.controls["down"] = false; });
@@ -132,15 +134,17 @@ export class Assignment3 extends Scene {
     
     reset() {
         this.start = true;
-
         this.init_game_systems();
     }
 
     init_game_systems() {
         //refresh everything
+        //this.hm = false;
+        this.alive = true;
         this.paused = false;
         this.lock_screen = false;
         this.kills = 0;
+        this.lives = 3;
         this.player = new Player(this.controls);
         this.actor_manager = new Actor_Manager();
         this.actor_manager.add_actor(this.player);
@@ -191,7 +195,7 @@ export class Assignment3 extends Scene {
         const t = program_state.animation_time / 1000, dt = (this.paused) ? 0 : (program_state.animation_delta_time / 1000);
         
         //player has begun the game
-        if(this.start) { 
+        if(this.alive && this.start) { 
 
             if (this.lock_screen) {
                 program_state.set_camera(Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90)));
@@ -215,6 +219,16 @@ export class Assignment3 extends Scene {
             while (curr_enemy_node != null) {
 
                 let curr_enemy = curr_enemy_node.item;
+                
+                //if(this.hm) {
+                    if (curr_enemy.is_alive() && curr_enemy.collided(this.player)) {
+                        curr_enemy.kill();
+                        if(this.lives==0)
+                            this.alive = false;
+                        else
+                            this.lives--;
+                    }
+                    //}
 
                 let curr_bullet_node = this.actor_manager.actor_categories.get(Bullet.get_type_static()).head;
 
@@ -231,7 +245,6 @@ export class Assignment3 extends Scene {
                         }
                         curr_bullet.kill();
                     }
-
                     curr_bullet_node = curr_bullet_node.next;
                 }
 
@@ -268,10 +281,18 @@ export class Assignment3 extends Scene {
             let score_model = Mat4.identity().times(Mat4.translation(-19,-7,0)).times(Mat4.scale(0.5,0.5,0.5));
             this.shapes.text.set_string("Score: " + this.kills.toString(),context.context);
             this.shapes.text.draw(context,program_state,score_model,this.materials.text_mat);
+
+            //if(this.hm) {
+            //display number of lives:
+            let lives_model = Mat4.identity().times(Mat4.translation(5,-7,0)).times(Mat4.scale(0.3,0.3,0.3));
+            this.shapes.text.set_string("Lives: " + this.lives.toString(),context.context);
+            this.shapes.text.draw(context,program_state,lives_model,this.materials.text_mat);
+            //}
+           
         }
         
         //player has not yet started their first game
-        else { 
+        else if(this.alive) { 
             let new_game_L1 = Mat4.identity().times(Mat4.translation(-10,1,0)).times(Mat4.scale(1,1,1));
             let new_game_L2 = Mat4.identity().times(Mat4.translation(-10.75,-1,0)).times(Mat4.scale(1,1,1));
     
@@ -279,6 +300,17 @@ export class Assignment3 extends Scene {
             this.shapes.text2.set_string("to Begin",context.context);
             this.shapes.text.draw(context, program_state, new_game_L1, this.materials.text_mat);
             this.shapes.text2.draw(context,program_state,new_game_L2,this.materials.text_mat);
+        }
+
+        //player dead
+        else {
+            let game_over_L1 = Mat4.identity().times(Mat4.translation(-11.5,1,0)).times(Mat4.scale(1,1,1));
+            let game_over_L2= Mat4.identity().times(Mat4.translation(-9,-1,0)).times(Mat4.scale(0.5,0.5,0.5));
+    
+            this.shapes.text.set_string("Game Over",context.context);
+            this.shapes.text2.set_string("Try Again",context.context);
+            this.shapes.text.draw(context, program_state, game_over_L1, this.materials.text_mat);
+            this.shapes.text2.draw(context,program_state, game_over_L2,this.materials.text_mat);
         }
     }
         
