@@ -87,8 +87,8 @@ export class Assignment3 extends Scene {
         this.key_triggered_button("New Game", ["g"], () => this.reset());
         //this.key_triggered_button("Hard Mode/Endless Mode", ["h"], () => {this.hm = !this.hm});
         this.key_triggered_button("Pause/Unpause", ["u"], () => {this.paused = !this.paused});
-        this.key_triggered_button("Move Up", ["i"], () => { this.controls["up"] = true; }, undefined, () => { this.controls["up"] = false; });
-        this.key_triggered_button("Move Down", ["k"], () => { this.controls["down"] = true; }, undefined, () => { this.controls["down"] = false; });
+        this.key_triggered_button("Move Up", ["ArrowUp"], () => { this.controls["up"] = true; }, undefined, () => { this.controls["up"] = false; });
+        this.key_triggered_button("Move Down", ["ArrowDown"], () => { this.controls["down"] = true; }, undefined, () => { this.controls["down"] = false; });
         //this.key_triggered_button("Move Right", ["]"], this.move_right);
         //this.key_triggered_button("Move Left", ["["], this.move_left);
         this.key_triggered_button("Shoot", ["j"], () => { this.shoot_bullet(0) });
