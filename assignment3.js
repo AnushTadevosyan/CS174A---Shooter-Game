@@ -2,6 +2,7 @@ import { defs, tiny } from './examples/common.js';
 import { Bullet, Enemy, Player, Star } from './Actor.js';
 import {Actor_Manager} from './Actor_Manager.js';
 import { Text_Line } from './examples/text-demo.js';
+import {Shape_From_File} from "./examples/obj-file-demo.js";
 
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture
@@ -22,6 +23,10 @@ export class Assignment3 extends Scene {
             //        (Requirement 1)
             text: new Text_Line(15),
             text2: new Text_Line(15),
+            bumpy_asteroid: new Shape_From_File("assets/bumpy_aster.obj"),
+            round_asteroid: new Shape_From_File("assets/round_asteroid.obj"),
+            spaceship: new Shape_From_File("assets/rocket.obj")
+
             //text3: new Text_Line(15)
         };
 
