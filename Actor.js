@@ -107,6 +107,8 @@ class Enemy extends Actor {
         this.coords.x += dt * this.speed;
 
         if (this.coords.x < -25) this.kill();
+
+        this.rot.z += dt;
     }
 
     static get_type_static() { return "Enemy"; }
