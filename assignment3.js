@@ -155,6 +155,8 @@ export class Assignment3 extends Scene {
         this.actor_manager.add_actor(this.player);
         this.actor_manager.add_category(Enemy.get_type_static());
         this.actor_manager.add_category(Bullet.get_type_static());
+
+        this.player.shape = this.shapes.spaceship
     }
 
     shoot_bullet(angle) {
@@ -165,7 +167,11 @@ export class Assignment3 extends Scene {
     draw_actor(actor, shape, mat, context, program_state) {
         let coords = actor.get_coordinates();
         let s = actor.get_radius();
-        let model_transform = Mat4.translation(coords.x, coords.y, coords.z).times(Mat4.scale(s, s, s));
+        if (actor.shape)
+            shape = actor.shape;
+        if (actor.material)
+            mat = actor.material
+        let model_transform = Mat4.translation(coords.x, coords.y, coords.z).times(actor.get_rotation_matrix()).times(Mat4.scale(s, s, s));
         shape.draw(context, program_state, model_transform, mat);
     }
 

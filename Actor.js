@@ -1,26 +1,30 @@
 import {defs, tiny} from './examples/common.js';
 
 const {
-    Vector, Vector3, vec, vec3, vec4, color, hex_color, Matrix
+    Vector, Vector3, vec, vec3, vec4, color, hex_color, Matrix, Mat4
 } = tiny;
 
 function tuple3(x, y, z) { return {x: x, y: y, z: z}}
 
 class Actor {
 
-    constructor(coordinates, rotations, size, hitbox_size = size, health = 1) {
+    constructor(coordinates, rotations, size, hitbox_size = size, health = 1, shape = null, material = null) {
         this.coords = coordinates;
         this.rot = rotations;
         this.size = size;
         this.collider_radius = hitbox_size;
         this.alive = true;
         this.health = health;
+        this.shape = shape
+        this.material = material
     }
 
     // returns coordinates of this actor's origin (in middle)
     get_coordinates() { return this.coords; }
 
     get_rotations() { return this.rot; }
+
+    get_rotation_matrix() { return Mat4.rotation(this.rot.x, 1, 0, 0).times(Mat4.rotation(this.rot.y, 0, 1, 0)).times(Mat4.rotation(this.rot.z, 0, 0, 1)); }
 
     // override this function in subclasses
     update(t, dt) { }
@@ -140,11 +144,21 @@ class Player extends Actor {
         // clamp player movement
         move_amount = (move_amount < 7.5) ? move_amount : 0;
 
+        this.rot.x = 0;
+        this.rot.z = 0;
+
+        let x_rot_amount = .2;
+        let z_rot_amount = .1;
+
         if (this.controls["up"]) {
             this.move_up(move_amount)
+            this.rot.x -= x_rot_amount;
+            this.rot.z += z_rot_amount;
         }
         if (this.controls["down"]) {
             this.move_down(move_amount);
+            this.rot.x += x_rot_amount;
+            this.rot.z -= z_rot_amount;
         }
     }
 
