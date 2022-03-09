@@ -17,21 +17,6 @@ class Linked_List {
 
     is_empty() { return this.head == null && this.tail == null; }
 
-    // add item to front of list
-    push_front(item) {
-
-        if (this.head) {
-            let n = new Node(item);
-            this.head.prev = n;
-            n.next = this.head;
-            this.head = n;
-        }
-        else {
-            this.head = new Node(item);
-            this.tail = new Node(item);
-        }
-    }
-
     // add item to front of list and return ref to node
     push_front(item) {
 
