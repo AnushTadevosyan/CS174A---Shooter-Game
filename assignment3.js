@@ -281,12 +281,15 @@ export class Assignment3 extends Scene {
 
                 // there is a .5% chance that a new "enemy" will spawn at a random height
                 if (rng < 0.005) {
-                    let enemy = new Enemy(Math.floor(Math.random() * 10 - 3), .3, 5);
+                    let size_speed_offset = Math.random();
+                    let enemy = new Enemy(Math.floor(Math.random() * 10 - 5), 1 - size_speed_offset * .5, 5);
                     enemy.shape = this.shapes.bumpy_asteroid;
+                    enemy.rot.x += Math.random();
+                    enemy.rot.y += Math.random();
                     this.actor_manager.add_actor(enemy);
                 }
                 if (rng < 0.10) {
-                    this.actor_manager.add_actor(new Star(Math.floor(Math.random() * 30 - 10), .02, 10))
+                    this.actor_manager.add_actor(new Star(Math.floor(Math.random() * 15 - 6), .02, 10))
                 }
             }
             
