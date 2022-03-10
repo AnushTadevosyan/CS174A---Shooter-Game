@@ -23,6 +23,7 @@ export class Main extends Scene {
             //        (Requirement 1)
             text: new Text_Line(15),
             text2: new Text_Line(15),
+            text3: new Text_Line(20),
             bumpy_asteroid: new Shape_From_File("assets/bumpy_aster.obj"),
             round_asteroid: new Shape_From_File("assets/round_asteroid.obj"),
             spaceship: new Shape_From_File("assets/rocket.obj"),
@@ -100,6 +101,7 @@ export class Main extends Scene {
         //this.key_triggered_button("Move Right", ["]"], this.move_right);
         //this.key_triggered_button("Move Left", ["["], this.move_left);
         this.key_triggered_button("Shoot", ["j"], () => { this.shoot_bullet(0) });
+        this.key_triggered_button("Toggle Difficulty", ["t"], () => { this.difficulty = (this.difficulty + 1) % 3 });
         this.key_triggered_button("Lock Screen", ["q"], () => {this.lock_screen = !this.lock_screen});
 
         // debug
@@ -153,6 +155,9 @@ export class Main extends Scene {
         this.lock_screen = false;
         this.kills = 0;
         this.lives = 3;
+        this.difficulty = 0;
+        this.difficulty_str = "Easy";
+        this.enemy_speed = 5;
         this.player = new Player(this.controls);
         this.actor_manager = new Actor_Manager();
         this.actor_manager.add_actor(this.player);
@@ -164,7 +169,7 @@ export class Main extends Scene {
 
     shoot_bullet(angle) {
         let c = this.player.get_coordinates();
-        this.actor_manager.add_actor(new Bullet({ x: c.x, y: c.y, z: c.z }, .2, 6, angle));
+        this.actor_manager.add_actor(new Bullet({ x: c.x, y: c.y, z: c.z }, .2, 8, angle));
     }
 
     draw_actor(actor, shape, mat, context, program_state) {
@@ -207,6 +212,21 @@ export class Main extends Scene {
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
         const t = program_state.animation_time / 1000, dt = (this.paused) ? 0 : (program_state.animation_delta_time / 1000);
+
+        switch(this.difficulty) {
+            case 0:
+                this.difficulty_str = "Easy";
+                this.enemy_speed = 5;
+                break;
+            case 1: 
+                this.difficulty_str = "Medium";
+                this.enemy_speed = 10;
+                break;
+            case 2: 
+                this.difficulty_str = "Hard";
+                this.enemy_speed = 15;
+                break;
+        }
         
         //player has begun the game
         if(this.alive && this.start) { 
@@ -285,7 +305,7 @@ export class Main extends Scene {
                 // there is a .5% chance that a new "enemy" will spawn at a random height
                 if (rng < 0.005) {
                     let size_speed_offset = Math.random();
-                    let enemy = new Enemy(Math.floor(Math.random() * 10 - 5), 1 - size_speed_offset * .5, 5);
+                    let enemy = new Enemy(Math.floor(Math.random() * 10 - 5), 1 - size_speed_offset * .5, this.enemy_speed);
                     enemy.shape = this.shapes.bumpy_asteroid;
                     enemy.rot.x += Math.random();
                     enemy.rot.y += Math.random();
@@ -297,7 +317,7 @@ export class Main extends Scene {
             }
             
             //display score
-            let score_model = Mat4.identity().times(Mat4.translation(-19,-7,0)).times(Mat4.scale(0.5,0.5,0.5));
+            let score_model = Mat4.identity().times(Mat4.translation(-19,-7,0)).times(Mat4.scale(0.3,0.3,0.3));
             this.shapes.text.set_string("Score: " + this.kills.toString(),context.context);
             this.shapes.text.draw(context,program_state,score_model,this.materials.text_mat);
 
@@ -307,7 +327,11 @@ export class Main extends Scene {
             this.shapes.text.set_string("Lives: " + this.lives.toString(),context.context);
             this.shapes.text.draw(context,program_state,lives_model,this.materials.text_mat);
             //}
-           
+
+            //display difficulty   
+            let difficulty_text_model = Mat4.identity().times(Mat4.translation(-9,-7,0)).times(Mat4.scale(0.3,0.3,0.3));
+            this.shapes.text3.set_string("Difficulty: " + this.difficulty_str, context.context);
+            this.shapes.text3.draw(context,program_state,difficulty_text_model,this.materials.text_mat);
         }
         
         //player has not yet started their first game
