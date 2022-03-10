@@ -158,6 +158,8 @@ export class Main extends Scene {
         this.difficulty = 0;
         this.difficulty_str = "Easy";
         this.enemy_speed = 5;
+        this.level = 1;
+        this.enemy_spawnrate = .005;
         this.player = new Player(this.controls);
         this.actor_manager = new Actor_Manager();
         this.actor_manager.add_actor(this.player);
@@ -227,6 +229,11 @@ export class Main extends Scene {
                 this.enemy_speed = 15;
                 break;
         }
+
+        //Level calculations (Every 10 kills move on to next level) 
+        //every level increases enemy spawn rate
+        this.level = Math.floor((this.kills / 10) + 1);
+        this.enemy_spawnrate = (this.level * .005);
         
         //player has begun the game
         if(this.alive && this.start) { 
@@ -302,8 +309,8 @@ export class Main extends Scene {
             else {
                 let rng = Math.random();
 
-                // there is a .5% chance that a new "enemy" will spawn at a random height
-                if (rng < 0.005) {
+                // there is a .5% chance (at level 1) that a new "enemy" will spawn at a random height
+                if (rng < this.enemy_spawnrate) {
                     let size_speed_offset = Math.random();
                     let enemy = new Enemy(Math.floor(Math.random() * 10 - 5), 1 - size_speed_offset * .5, this.enemy_speed);
                     enemy.shape = this.shapes.bumpy_asteroid;
@@ -332,6 +339,11 @@ export class Main extends Scene {
             let difficulty_text_model = Mat4.identity().times(Mat4.translation(-9,-7,0)).times(Mat4.scale(0.3,0.3,0.3));
             this.shapes.text3.set_string("Difficulty: " + this.difficulty_str, context.context);
             this.shapes.text3.draw(context,program_state,difficulty_text_model,this.materials.text_mat);
+
+            //display level
+            let level_text_model = Mat4.identity().times(Mat4.translation(-7,7,0)).times(Mat4.scale(0.3,0.3,0.3));
+            this.shapes.text3.set_string("Level " + this.level.toString(), context.context);
+            this.shapes.text3.draw(context,program_state,level_text_model,this.materials.text_mat);
         }
         
         //player has not yet started their first game
