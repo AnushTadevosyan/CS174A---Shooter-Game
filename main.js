@@ -25,7 +25,8 @@ export class Main extends Scene {
             text2: new Text_Line(15),
             bumpy_asteroid: new Shape_From_File("assets/bumpy_aster.obj"),
             round_asteroid: new Shape_From_File("assets/round_asteroid.obj"),
-            spaceship: new Shape_From_File("assets/rocket.obj")
+            spaceship: new Shape_From_File("assets/rocket.obj"),
+            bullet : new Shape_From_File("assets/bullet.obj")
 
             //text3: new Text_Line(15)
         };
