@@ -8,7 +8,7 @@ const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture
 } = tiny;
 
-export class Assignment3 extends Scene {
+export class Main extends Scene {
     constructor() {
         // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
         super();
@@ -44,7 +44,9 @@ export class Assignment3 extends Scene {
             ring: new Material(new Ring_Shader()),
 
             text_mat: new Material(new defs.Textured_Phong(1),
-                { ambient: 1, diffusivity: 0, specularity: 0, texture: new Texture("assets/text.png") })
+                { ambient: 1, diffusivity: 0, specularity: 0, texture: new Texture("assets/text.png") }),
+            space_ship: new Material(new defs.Textured_Phong(1),
+                { ambient: 1, diffusivity: 0, specularity: 0, texture: new Texture("assets/spaceship_Metallic.png") })
         };
 
         this.initial_camera_location = Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90));
@@ -220,7 +222,7 @@ export class Assignment3 extends Scene {
             while (curr_actor_node != null) {
                 let curr_actor = curr_actor_node.item;
                 if (curr_actor.is_alive())
-                    this.draw_actor(curr_actor, this.shapes.sphere, this.actor_type_material.get(curr_actor.get_type()), context, program_state);
+                    this.draw_actor(curr_actor, this.shapes.sphere, this.materials.space_ship, context, program_state);
                 curr_actor_node = curr_actor_node.next;
             }
 
