@@ -102,7 +102,7 @@ export class Main extends Scene {
         //this.key_triggered_button("Move Left", ["["], this.move_left);
         this.key_triggered_button("Shoot", ["j"], () => { this.shoot_bullet(0) });
         this.key_triggered_button("Toggle Difficulty", ["t"], () => { this.difficulty = (this.difficulty + 1) % 3 });
-        this.key_triggered_button("Lock Screen", ["q"], () => {this.lock_screen = !this.lock_screen});
+        this.key_triggered_button("Toggle Screenlock", ["q"], () => {this.lock_screen = !this.lock_screen});
 
         // debug
         // this.key_triggered_button("Spawn Enemy", ["b"], () => { this.actor_manager.add_actor(new Enemy(Math.floor(Math.random() * 15 - 3), .3, 5)); });
@@ -152,7 +152,7 @@ export class Main extends Scene {
         //this.hm = false;
         this.alive = true;
         this.paused = false;
-        this.lock_screen = false;
+        this.lock_screen = true;
         this.kills = 0;
         this.lives = 3;
         this.difficulty = 0;
