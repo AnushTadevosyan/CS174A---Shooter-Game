@@ -64,11 +64,11 @@ export class Main extends Scene {
         );
         this.actor_type_material.set(
             Enemy.get_type_static(), new Material(new defs.Phong_Shader(),
-                { ambient: .4, diffusivity: .6, color: hex_color("#FF0000") })
+                { ambient: .4, diffusivity: .6, color: hex_color("#3d3635") })
         );
         this.actor_type_material.set(
             Bullet.get_type_static(), new Material(new defs.Phong_Shader(),
-                { ambient: .4, diffusivity: .6, color: hex_color("#00FF00") })
+                { ambient: .8, diffusivity: .6, color: hex_color("#d4af37") })
         );
         this.actor_type_material.set(
             Star.get_type_static(), new Material(new defs.Phong_Shader(),
