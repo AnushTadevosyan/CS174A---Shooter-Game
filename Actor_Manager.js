@@ -60,7 +60,7 @@ class Linked_List {
     // quick delete node by reference
     delete(node) {
         if (this.node_set.has(node)) {
-            
+
             if (node.next) {
                 node.next.prev = node.prev;
             }
@@ -78,7 +78,7 @@ class Linked_List {
             }
 
             this.node_set.delete(node);
-            
+
         }
     }
 

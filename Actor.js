@@ -1,10 +1,10 @@
-import {defs, tiny} from './examples/common.js';
+import { defs, tiny } from './examples/common.js';
 
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Matrix, Mat4
 } = tiny;
 
-function tuple3(x, y, z) { return {x: x, y: y, z: z}}
+function tuple3(x, y, z) { return { x: x, y: y, z: z } }
 
 class Actor {
 
@@ -79,8 +79,8 @@ class Bullet extends Actor {
 
         // delete bullet based on how long it's been on screen
         // maybe replace with detecting when off screen?
-        this.age = 0; 
-                      
+        this.age = 0;
+
     }
 
     update(t, dt) {
@@ -116,12 +116,12 @@ class Enemy extends Actor {
 
 class Player extends Actor {
     constructor(controls) {
-        super(tuple3(-15,-1,0), tuple3(0,0,0), 1);
+        super(tuple3(-15, -1, 0), tuple3(0, 0, 0), 1);
         this.controls = controls;
         this.speed = 10;
     }
 
-    move_up(amount = 1) { 
+    move_up(amount = 1) {
         let new_height = this.coords.y + amount;
         if (new_height < 7.5)
             this.coords.y = new_height;
