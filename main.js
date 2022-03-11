@@ -103,7 +103,7 @@ export class Main extends Scene {
         //this.key_triggered_button("Move Left", ["["], this.move_left);
         this.key_triggered_button("Shoot", ["j"], () => { this.shoot_bullet(0) });
         this.key_triggered_button("Toggle Difficulty", ["t"], () => { this.difficulty = (this.difficulty + 1) % 3 });
-        this.key_triggered_button("Toggle Screenlock", ["q"], () => {this.lock_screen = !this.lock_screen});
+        //this.key_triggered_button("Toggle Screenlock", ["q"], () => {this.lock_screen = !this.lock_screen});
         this.key_triggered_button("Music On/Off", ["m"], () => { this.play_audio = !this.play_audio});
         // debug
         // this.key_triggered_button("Spawn Enemy", ["b"], () => { this.actor_manager.add_actor(new Enemy(Math.floor(Math.random() * 15 - 3), .3, 5)); });
@@ -187,7 +187,7 @@ export class Main extends Scene {
         }
 
         if (!context.scratchpad.controls) {
-            this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
+            //this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
 
             program_state.set_camera(this.initial_camera_location);
 
