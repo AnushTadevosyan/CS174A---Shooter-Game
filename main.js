@@ -108,6 +108,9 @@ export class Main extends Scene {
     }
 
     my_mouse_down(e, pos, context, program_state) {
+
+        if (this.paused) return;
+
         //HARD CODED BASED ON SCREEN DIMENSIONS: (-20<x<9, -7.5<y<7.5)
         //IF SCREEN DIMENSIONS CHANGE, THIS NEEDS TO BE CHANGED
         let mouse_x = (pos[0] * 15) - 5.5;
@@ -120,26 +123,6 @@ export class Main extends Scene {
         if (x_diff > 0) 
             this.shoot_bullet(bullet_angle);
     }
-
-    move_up() {
-        if(this.player.coords.y<7.5 && !this.paused)
-            this.player.move_up();
-    }
-
-    move_down() {
-        if(this.player.coords.y>-7.5 && !this.paused)
-            this.player.move_down();
-    }
-
-/*     move_right() {
-        if(this.player.coords.x<9 && !this.paused)
-            this.player.move_right();
-    }
-
-    move_left() {
-        if(this.player.coords.x>-20 && !this.paused)
-            this.player.move_left();
-    } */
     
     reset() {
         this.start = true;
@@ -213,7 +196,7 @@ export class Main extends Scene {
 
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
-        const t = program_state.animation_time / 1000, dt = (this.paused) ? 0 : (program_state.animation_delta_time / 1000);
+        const t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
 
         switch(this.difficulty) {
             case 0:
@@ -242,8 +225,6 @@ export class Main extends Scene {
                 program_state.set_camera(Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90)));
             }
 
-            this.actor_manager.update_actor_list(t, dt);
-
             // draw actors that are allive
             let curr_actor_node = this.actor_manager.actor_list.head;
 
@@ -254,44 +235,7 @@ export class Main extends Scene {
                 curr_actor_node = curr_actor_node.next;
             }
 
-            // check for collisions between enemies and bullets
-            let curr_enemy_node = this.actor_manager.actor_categories.get(Enemy.get_type_static()).head;
-            
-            while (curr_enemy_node != null) {
-
-                let curr_enemy = curr_enemy_node.item;
-                
-                //if(this.hm) {
-                    if (curr_enemy.is_alive() && curr_enemy.collided(this.player)) {
-                        curr_enemy.kill();
-                        if(this.lives==0)
-                            this.alive = false;
-                        else
-                            this.lives--;
-                    }
-                    //}
-
-                let curr_bullet_node = this.actor_manager.actor_categories.get(Bullet.get_type_static()).head;
-
-                while (curr_bullet_node != null) {
-
-                    let curr_bullet = curr_bullet_node.item;
-
-                    if (curr_bullet.is_alive() && curr_enemy.is_alive() && curr_enemy.collided(curr_bullet)) {
-                        curr_enemy.add_damage(25);
-
-                        // add point if enemy was killed
-                        if (!curr_enemy.is_alive()) {
-                            this.kills++;
-                        }
-                        curr_bullet.kill();
-                    }
-                    curr_bullet_node = curr_bullet_node.next;
-                }
-
-                curr_enemy_node = curr_enemy_node.next;
-            }
-
+            // garbage collection
             if (this.actor_manager.get_num_loaded_actors() > 1000) {
                 this.actor_manager.cull_dead_actors();
             }
@@ -299,14 +243,54 @@ export class Main extends Scene {
             //game is paused
             if (this.paused) { 
                 //display "game is paused" text
-                let pause_L1 = Mat4.identity().times(Mat4.translation(-10,1,0.5)).times(Mat4.scale(1,1,1));
-                let pause_L2 = Mat4.identity().times(Mat4.translation(-9.25,-1,0.5)).times(Mat4.scale(1,1,1));
+                let pause_L1 = Mat4.identity().times(Mat4.translation(-10,1,3)).times(Mat4.scale(1,1,1));
+                let pause_L2 = Mat4.identity().times(Mat4.translation(-9.25,-1,3)).times(Mat4.scale(1,1,1));
                 this.shapes.text.set_string("Game Is",context.context);
                 this.shapes.text2.set_string("Paused",context.context);
                 this.shapes.text.draw(context, program_state, pause_L1, this.materials.text_mat);
                 this.shapes.text2.draw(context,program_state,pause_L2,this.materials.text_mat);
             }
             else {
+                this.actor_manager.update_actor_list(t, dt);
+
+                // check for collisions between enemies and bullets
+                let curr_enemy_node = this.actor_manager.actor_categories.get(Enemy.get_type_static()).head;
+                
+                while (curr_enemy_node != null) {
+
+                    let curr_enemy = curr_enemy_node.item;
+                    
+                    //if(this.hm) {
+                        if (curr_enemy.is_alive() && this.player.collided(curr_enemy)) {
+                            curr_enemy.kill();
+                            if(this.lives==0)
+                                this.alive = false;
+                            else
+                                this.lives--;
+                        }
+                        //}
+
+                    let curr_bullet_node = this.actor_manager.actor_categories.get(Bullet.get_type_static()).head;
+
+                    while (curr_bullet_node != null) {
+
+                        let curr_bullet = curr_bullet_node.item;
+
+                        if (curr_bullet.is_alive() && curr_enemy.is_alive() && curr_enemy.collided(curr_bullet)) {
+                            curr_enemy.add_damage(25);
+
+                            // add point if enemy was killed
+                            if (!curr_enemy.is_alive()) {
+                                this.kills++;
+                            }
+                            curr_bullet.kill();
+                        }
+                        curr_bullet_node = curr_bullet_node.next;
+                    }
+
+                    curr_enemy_node = curr_enemy_node.next;
+                }
+
                 let rng = Math.random();
 
                 // there is a .5% chance (at level 1) that a new "enemy" will spawn at a random height
@@ -324,7 +308,7 @@ export class Main extends Scene {
             }
             
             //display score
-            let score_model = Mat4.identity().times(Mat4.translation(-19,-7,0)).times(Mat4.scale(0.3,0.3,0.3));
+            let score_model = Mat4.identity().times(Mat4.translation(-15,-6,3)).times(Mat4.scale(0.3,0.3,0.3));
             this.shapes.text.set_string("Score: " + this.kills.toString(),context.context);
             this.shapes.text.draw(context,program_state,score_model,this.materials.text_mat);
 
