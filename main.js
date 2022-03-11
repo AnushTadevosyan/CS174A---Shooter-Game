@@ -154,7 +154,10 @@ export class Main extends Scene {
 
     shoot_bullet(angle) {
         let c = this.player.get_coordinates();
-        this.actor_manager.add_actor(new Bullet({ x: c.x, y: c.y, z: c.z }, .2, 8, angle));
+        let b = new Bullet({ x: c.x, y: c.y, z: c.z }, .2, 8, angle);
+        b.shape = this.shapes.bullet
+        b.rot.z  = angle;
+        this.actor_manager.add_actor(b);
     }
 
     draw_actor(actor, shape, mat, context, program_state) {
