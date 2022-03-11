@@ -266,7 +266,7 @@ export class Main extends Scene {
                     //if(this.hm) {
                         if (curr_enemy.is_alive() && this.player.collided(curr_enemy)) {
                             curr_enemy.kill();
-                            if(this.lives==0)
+                            if(this.lives==1)
                                 this.alive = false;
                             else
                                 this.lives--;
