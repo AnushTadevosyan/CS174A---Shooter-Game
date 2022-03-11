@@ -58,8 +58,7 @@ export class Main extends Scene {
 
         this.actor_type_material = new Map();
         this.actor_type_material.set(
-            Player.get_type_static(), new Material(new defs.Phong_Shader(), 
-            { ambient: .4, diffusivity: .6, color: hex_color("#fac91a") })
+            Player.get_type_static(), this.materials.space_ship
         );
         this.actor_type_material.set(
             Enemy.get_type_static(), new Material(new defs.Phong_Shader(), 
@@ -167,6 +166,7 @@ export class Main extends Scene {
         this.actor_manager.add_category(Bullet.get_type_static());
 
         this.player.shape = this.shapes.spaceship
+        this.player.material = this.materials.space_ship
     }
 
     shoot_bullet(angle) {
@@ -176,7 +176,7 @@ export class Main extends Scene {
 
     draw_actor(actor, shape, mat, context, program_state) {
         let coords = actor.get_coordinates();
-        let s = actor.get_radius();
+        let s = actor.size
         if (actor.shape)
             shape = actor.shape;
         if (actor.material)
@@ -250,7 +250,7 @@ export class Main extends Scene {
             while (curr_actor_node != null) {
                 let curr_actor = curr_actor_node.item;
                 if (curr_actor.is_alive())
-                    this.draw_actor(curr_actor, this.shapes.sphere, this.materials.space_ship, context, program_state);
+                    this.draw_actor(curr_actor, this.shapes.sphere, this.actor_type_material.get(curr_actor.get_type()), context, program_state);
                 curr_actor_node = curr_actor_node.next;
             }
 
