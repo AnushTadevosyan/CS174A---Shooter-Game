@@ -78,7 +78,7 @@ export class Main extends Scene {
         this.controls = new Map();
         this.controls["up"] = false;
         this.controls["down"] = false;
-
+        this.bullet_limit_timer = 0;
     }
 
     make_control_panel() {
@@ -156,6 +156,10 @@ export class Main extends Scene {
     }
 
     shoot_bullet(angle) {
+
+        if (this.paused || this.bullet_limit_timer > 0) return;
+
+        this.bullet_limit_timer = 0.25; // player can fire new bullet every 1/4 second
         let c = this.player.get_coordinates();
         let b = new Bullet({ x: c.x, y: c.y, z: c.z }, .2, 8, angle);
         b.shape = this.shapes.bullet
@@ -264,6 +268,7 @@ export class Main extends Scene {
             }
             else {
                 this.actor_manager.update_actor_list(t, dt);
+                this.bullet_limit_timer -= dt;
 
                 // check for collisions between enemies and bullets
                 let curr_enemy_node = this.actor_manager.actor_categories.get(Enemy.get_type_static()).head;
