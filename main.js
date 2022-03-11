@@ -13,6 +13,8 @@ export class Main extends Scene {
         // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
         super();
 
+        this.audio = new Audio("assets/musicc.mp3")
+
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
             torus: new defs.Torus(15, 15),
@@ -61,22 +63,22 @@ export class Main extends Scene {
             Player.get_type_static(), this.materials.space_ship
         );
         this.actor_type_material.set(
-            Enemy.get_type_static(), new Material(new defs.Phong_Shader(), 
-            { ambient: .4, diffusivity: .6, color: hex_color("#FF0000") })
+            Enemy.get_type_static(), new Material(new defs.Phong_Shader(),
+                { ambient: .4, diffusivity: .6, color: hex_color("#FF0000") })
         );
         this.actor_type_material.set(
-            Bullet.get_type_static(), new Material(new defs.Phong_Shader(), 
-            { ambient: .4, diffusivity: .6, color: hex_color("#00FF00") })
+            Bullet.get_type_static(), new Material(new defs.Phong_Shader(),
+                { ambient: .4, diffusivity: .6, color: hex_color("#00FF00") })
         );
         this.actor_type_material.set(
-            Star.get_type_static(), new Material(new defs.Phong_Shader(), 
-            { ambient: 1, diffusivity: .6, color: hex_color("#FFFFFF") })
+            Star.get_type_static(), new Material(new defs.Phong_Shader(),
+                { ambient: 1, diffusivity: .6, color: hex_color("#FFFFFF") })
         );
 
         this.controls = new Map();
         this.controls["up"] = false;
         this.controls["down"] = false;
-        this.bullet_limit_timer = 0;
+
     }
 
     make_control_panel() {
@@ -102,12 +104,14 @@ export class Main extends Scene {
         this.key_triggered_button("Shoot", ["j"], () => { this.shoot_bullet(0) });
         this.key_triggered_button("Toggle Difficulty", ["t"], () => { this.difficulty = (this.difficulty + 1) % 3 });
         this.key_triggered_button("Toggle Screenlock", ["q"], () => {this.lock_screen = !this.lock_screen});
-
+        this.key_triggered_button("Music On/Off", ["m"], () => { this.play_audio = !this.play_audio});
         // debug
         // this.key_triggered_button("Spawn Enemy", ["b"], () => { this.actor_manager.add_actor(new Enemy(Math.floor(Math.random() * 15 - 3), .3, 5)); });
     }
 
     my_mouse_down(e, pos, context, program_state) {
+
+        if (this.paused) return;
 
         //HARD CODED BASED ON SCREEN DIMENSIONS: (-20<x<9, -7.5<y<7.5)
         //IF SCREEN DIMENSIONS CHANGE, THIS NEEDS TO BE CHANGED
@@ -118,10 +122,10 @@ export class Main extends Scene {
         let y_diff = (mouse_y - this.player.coords.y);
         let bullet_angle = Math.atan(y_diff/x_diff);
 
-        if (x_diff > 0) 
+        if (x_diff > 0)
             this.shoot_bullet(bullet_angle);
     }
-    
+
     reset() {
         this.start = true;
         this.init_game_systems();
@@ -133,6 +137,7 @@ export class Main extends Scene {
         this.alive = true;
         this.paused = false;
         this.lock_screen = true;
+        this.play_audio = false;
         this.kills = 0;
         this.lives = 3;
         this.difficulty = 0;
@@ -151,11 +156,6 @@ export class Main extends Scene {
     }
 
     shoot_bullet(angle) {
-
-        if (this.paused || this.bullet_limit_timer > 0) return;
-
-        this.bullet_limit_timer = 0.25; // player can fire new bullet every 1/4 second
-
         let c = this.player.get_coordinates();
         let b = new Bullet({ x: c.x, y: c.y, z: c.z }, .2, 8, angle);
         b.shape = this.shapes.bullet
@@ -176,6 +176,12 @@ export class Main extends Scene {
 
     display(context, program_state) {
 
+        if(this.play_audio) {
+            this.audio.play();
+        }else{
+            this.audio.pause();
+        }
+
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
 
@@ -193,7 +199,7 @@ export class Main extends Scene {
                 this.my_mouse_down(e, mouse_position(e), context, program_state);
             });
 
-        }   
+        }
 
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, .1, 1000);
@@ -209,23 +215,23 @@ export class Main extends Scene {
                 this.difficulty_str = "Easy";
                 this.enemy_speed = 5;
                 break;
-            case 1: 
+            case 1:
                 this.difficulty_str = "Medium";
                 this.enemy_speed = 10;
                 break;
-            case 2: 
+            case 2:
                 this.difficulty_str = "Hard";
                 this.enemy_speed = 15;
                 break;
         }
 
-        //Level calculations (Every 10 kills move on to next level) 
+        //Level calculations (Every 10 kills move on to next level)
         //every level increases enemy spawn rate
         this.level = Math.floor((this.kills / 10) + 1);
         this.enemy_spawnrate = (this.level * .005);
-        
+
         //player has begun the game
-        if(this.alive && this.start) { 
+        if(this.alive && this.start) {
 
             if (this.lock_screen) {
                 program_state.set_camera(Mat4.translation(5, 0, -20).times(Mat4.rotation(0, 0, 0, -90)));
@@ -247,7 +253,7 @@ export class Main extends Scene {
             }
 
             //game is paused
-            if (this.paused) { 
+            if (this.paused) {
                 //display "game is paused" text
                 let pause_L1 = Mat4.identity().times(Mat4.translation(-10,1,3)).times(Mat4.scale(1,1,1));
                 let pause_L2 = Mat4.identity().times(Mat4.translation(-9.25,-1,3)).times(Mat4.scale(1,1,1));
@@ -258,24 +264,23 @@ export class Main extends Scene {
             }
             else {
                 this.actor_manager.update_actor_list(t, dt);
-                this.bullet_limit_timer -= dt;
 
                 // check for collisions between enemies and bullets
                 let curr_enemy_node = this.actor_manager.actor_categories.get(Enemy.get_type_static()).head;
-                
+
                 while (curr_enemy_node != null) {
 
                     let curr_enemy = curr_enemy_node.item;
-                    
+
                     //if(this.hm) {
-                        if (curr_enemy.is_alive() && this.player.collided(curr_enemy)) {
-                            curr_enemy.kill();
-                            if(this.lives==1)
-                                this.alive = false;
-                            else
-                                this.lives--;
-                        }
-                        //}
+                    if (curr_enemy.is_alive() && this.player.collided(curr_enemy)) {
+                        curr_enemy.kill();
+                        if(this.lives==0)
+                            this.alive = false;
+                        else
+                            this.lives--;
+                    }
+                    //}
 
                     let curr_bullet_node = this.actor_manager.actor_categories.get(Bullet.get_type_static()).head;
 
@@ -313,7 +318,7 @@ export class Main extends Scene {
                     this.actor_manager.add_actor(new Star(Math.floor(Math.random() * 15 - 6), .02, 10))
                 }
             }
-            
+
             //display score
             let score_model = Mat4.identity().times(Mat4.translation(-15,-6,3)).times(Mat4.scale(0.3,0.3,0.3));
             this.shapes.text.set_string("Score: " + this.kills.toString(),context.context);
@@ -326,7 +331,7 @@ export class Main extends Scene {
             this.shapes.text.draw(context,program_state,lives_model,this.materials.text_mat);
             //}
 
-            //display difficulty   
+            //display difficulty
             let difficulty_text_model = Mat4.identity().times(Mat4.translation(-9,-7,0)).times(Mat4.scale(0.3,0.3,0.3));
             this.shapes.text3.set_string("Difficulty: " + this.difficulty_str, context.context);
             this.shapes.text3.draw(context,program_state,difficulty_text_model,this.materials.text_mat);
@@ -336,12 +341,12 @@ export class Main extends Scene {
             this.shapes.text3.set_string("Level " + this.level.toString(), context.context);
             this.shapes.text3.draw(context,program_state,level_text_model,this.materials.text_mat);
         }
-        
+
         //player has not yet started their first game
-        else if(this.alive) { 
+        else if(this.alive) {
             let new_game_L1 = Mat4.identity().times(Mat4.translation(-10,1,0)).times(Mat4.scale(1,1,1));
             let new_game_L2 = Mat4.identity().times(Mat4.translation(-10.75,-1,0)).times(Mat4.scale(1,1,1));
-    
+
             this.shapes.text.set_string("Press g",context.context);
             this.shapes.text2.set_string("to Begin",context.context);
             this.shapes.text.draw(context, program_state, new_game_L1, this.materials.text_mat);
@@ -352,15 +357,15 @@ export class Main extends Scene {
         else {
             let game_over_L1 = Mat4.identity().times(Mat4.translation(-11.5,1,0)).times(Mat4.scale(1,1,1));
             let game_over_L2= Mat4.identity().times(Mat4.translation(-9,-1,0)).times(Mat4.scale(0.5,0.5,0.5));
-    
+
             this.shapes.text.set_string("Game Over",context.context);
             this.shapes.text2.set_string("Try Again",context.context);
             this.shapes.text.draw(context, program_state, game_over_L1, this.materials.text_mat);
             this.shapes.text2.draw(context,program_state, game_over_L2,this.materials.text_mat);
         }
     }
-        
-        
+
+
 }
 
 class Gouraud_Shader extends Shader {
@@ -550,4 +555,5 @@ class Ring_Shader extends Shader {
         }`;
     }
 }
+
 
